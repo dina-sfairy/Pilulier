@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>294</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Choisir la prescription</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QListWidget" name="listePrescriptions">
+      <property name="resizeMode">
+       <enum>QListView::Adjust</enum>
+      </property>
+      <property name="viewMode">
+       <enum>QListView::IconMode</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>test_1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_3</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_4</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_5</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_6</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>test_7</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>demo</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Instructions</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="messagesTextEdit"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="boutonDemarer">
+      <property name="text">
+       <string>Démarer</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="boutonArreter">
+      <property name="text">
+       <string>Arrêter</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
