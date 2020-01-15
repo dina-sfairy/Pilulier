@@ -4,6 +4,8 @@
 int nano_comp = 3;
 int nano_dist = 4;
 
+// Test de vérification
+
 TimedAction timedActionComp = TimedAction(4000, commanderCompartimentation);
 TimedAction timedActionDist = TimedAction(4000, commanderDistribution);
 
