@@ -66,6 +66,7 @@ void receiveEvent(int bytes) {
 		break;
 	}
 	// Si MS1 et MS2 ne sont pas connectés au ground, 1600 steps = 1 tour
+	Serial.println(momentJournee);
 	ASstepper2.setCurrentPosition(0);
 	ASstepper2.moveTo(pos);
 

@@ -18,13 +18,14 @@ void loop() {
 	timedActionComp.check();
 	timedActionDist.check();
 	delay(100);
+	Serial.println(nano_dist);
 	Wire.requestFrom(11, 1);
 	bool ready = false;
 	while (Wire.available())    // slave may send less than requested
 	{
 		ready = Wire.read();
 	}
-	//Serial.println(ready);
+	Serial.println(ready);
 
 }
 
