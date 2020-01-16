@@ -15,6 +15,8 @@ void setup() {
 }
 
 void loop() {
+	/*nano_dist++;
+	Serial.println(nano_dist);*/
 	timedActionComp.check();
 	timedActionDist.check();
 	delay(100);

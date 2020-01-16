@@ -29,17 +29,18 @@ Servo Servo1;
 void setup() {
 	// Define the LED pin as Output
 	pinMode(LED, OUTPUT);
-	ASstepper2.setMaxSpeed(6000);
-	ASstepper2.setAcceleration(4000);
+	/*ASstepper2.setMaxSpeed(6000);
+	ASstepper2.setAcceleration(4000);*/
 	// Start the I2C Bus as Slave on address 11
 	Wire.begin(11);
+	Serial.begin(115200);
 	// Attach a function to trigger when something is received.
 	Wire.onReceive(receiveEvent);
 	Wire.onRequest(requestEvent);
 	retour = false;
 	etape = 1;
-	Servo1.attach(servoPin);
-	Servo1.write(0);
+	/*Servo1.attach(servoPin);
+	Servo1.write(0);*/
 	delay(500);
 
 }
@@ -66,8 +67,8 @@ void receiveEvent(int bytes) {
 		break;
 	}
 	// Si MS1 et MS2 ne sont pas connectés au ground, 1600 steps = 1 tour
-	ASstepper2.setCurrentPosition(0);
-	ASstepper2.moveTo(pos);
+	/*ASstepper2.setCurrentPosition(0);
+	ASstepper2.moveTo(pos);*/
 
 }
 
@@ -75,13 +76,13 @@ void requestEvent() {
 	digitalWrite(LED, HIGH);
 	delay(200);
 	digitalWrite(LED, LOW);
-	//Serial.print("Request event : "); Serial.println(termine);
-	Wire.write(retour);
+	Serial.println(momentJournee);
+	Wire.write(4);
 	
 }
 
 void loop() {
-	ASstepper2.run();
+	/*ASstepper2.run();
 
 	if (ASstepper2.distanceToGo() == 0) {
 
@@ -101,6 +102,8 @@ void loop() {
 		}
 
 
-	}
+	}*/
+	Serial.println(1);
+
 
 }
