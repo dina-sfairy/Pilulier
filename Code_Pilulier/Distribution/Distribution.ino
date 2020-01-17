@@ -73,12 +73,8 @@ void receiveEvent(int bytes) {
 }
 
 void requestEvent() {
-	//digitalWrite(LED, HIGH);
-	//delay(200);
-	//digitalWrite(LED, LOW);
-	////Serial.print("Request event : "); Serial.println(termine);
-	//Wire.write(retour);
-	Wire.write(44);
+	
+	Wire.write(retour);
 
 }
 
