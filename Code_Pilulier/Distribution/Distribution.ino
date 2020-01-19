@@ -23,6 +23,8 @@ int momentJournee = 0;
 bool retour;
 int etape;
 int servoPin = 3;
+int homePosition;
+int posAjustement = (int)(100 / PI);
 // Create a servo object 
 Servo Servo1;
 
@@ -39,8 +41,9 @@ void setup() {
 	retour = false;
 	etape = 1;
 	Servo1.attach(servoPin);
-	Servo1.write(0);
+	Servo1.write(0); // À ajuster en fonction de la position réelle pour que la trappe soit horizontale initialement
 	delay(500);
+	pinMode(6, INPUT);
 
 }
 void receiveEvent(int bytes) {
@@ -80,7 +83,9 @@ void requestEvent() {
 
 void loop() {
 	ASstepper2.run();
-
+	/*homePosition = digitalRead(6);
+	Serial.println(homePosition);
+	delay(10);*/
 	if (ASstepper2.distanceToGo() == 0) {
 
 		if (etape == 1) {
@@ -95,7 +100,14 @@ void loop() {
 			etape++;
 		}
 		else if (etape == 2) {
-			retour = true;
+
+			if (digitalRead(6) != 0) {
+				ASstepper2.setCurrentPosition(0);
+				ASstepper2.moveTo(-posAjustement);
+			}
+			else {
+				retour = true;
+			}
 		}
 
 
