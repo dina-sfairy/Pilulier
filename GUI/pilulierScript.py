@@ -79,6 +79,11 @@ class ApplicationPilulier:
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
 
+    def envoyerMatrice(self, matricePrescription):
+        for i in range(7):
+            for j in range(4):
+                self.serPort.write(bytes([matricePrescription[i, j]]))
+
     def updateMessage(self):
         if self.messageNeedsUpdate is True:
             self.ui.messagesTextEdit.setText(self.messageAAfficher)
