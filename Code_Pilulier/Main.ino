@@ -11,6 +11,7 @@
 #include <MultiStepper.h>
 #include <AccelStepper.h>
 #include <Wire.h>
+#include <VL53L0X.h> 
 
 bool capteurPil, capteurPur, ready, enMarche;
 int capPilPin = 1; //à modifier
