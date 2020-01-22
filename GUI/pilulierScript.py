@@ -107,6 +107,25 @@ class ApplicationPilulier:
             nomPillule = fichierPrescription.readline().split()[0]
         fichierPrescription.close()
 
+    def genererVecteurDeDistribution(self, ligneDePrescription):
+        """
+        Cette méthode génère un vecteur de distribution
+        :param ligneDePrescription: Vecteur represantant, pour une pilule donnée, la quantité à placer dans le pilulier
+         à chaque jour de la semaine pour un momment donné de la journée
+        :type ligneDePrescription: NumPy array 1D avec 7 éléments
+        :return: vecteur décrivant combien de cases il faut déplacer le tapis de compartimentation à chaque étape de
+        celui-ci pour la pilule donnée.
+        :rtype: NumPy array 1D avec un nombre maximal de 21 éléments
+        """
+        # TODO: Creer le vecteur de distribution
+        vecteurDeDistribution = np.array([], dtype=np.uint8)
+
+
+        # Pour des fins de tests voici un vecteur de prescription pour faire tes tests
+        vecteurPrescriptionPourTester = np.array([1, 0, 3, 0, 2, 1, 2], dtype=np.uint8)
+
+        return vecteurDeDistribution
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
