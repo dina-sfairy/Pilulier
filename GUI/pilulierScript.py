@@ -119,9 +119,24 @@ class ApplicationPilulier:
         # TODO: Creer le vecteur de distribution
         vecteurDeDistribution = np.array([], dtype=np.uint8)
 
+        # Initialiser le compteur d'incréments
+        compteur = 0
+        for i in range(7):
+            if ligneDePrescription[i] is not None:
+                compteur = compteur + 1
+                vecteurDeDistribution.append(compteur)
+                if ligneDePrescription[i] > 1:
+                    for j in range(ligneDePrescription[i]):
+                        vecteurDeDistribution.append(0)
+                compteur = 0
+            else:
+                compteur = compteur + 1
+
+        if compteur != 0:
+            vecteurDeDistribution = np.append(vecteurDeDistribution, compteur)
 
         # Pour des fins de tests voici un vecteur de prescription pour faire tes tests
-        vecteurPrescriptionPourTester = np.array([1, 0, 3, 0, 2, 1, 2], dtype=np.uint8)
+        # vecteurPrescriptionPourTester = np.array([1, 0, 3, 0, 2, 1, 2], dtype=np.uint8)
 
         return vecteurDeDistribution
 
