@@ -37,9 +37,8 @@ class ApplicationPilulier:
         self.systemControl = 0
 
         # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM4', 9600)
+        self.serPort = serial.Serial('COM6', 9600)
         time.sleep(3) # Il faut donner le temps au Arduino de reset
-
 
     def onDemarerClicked(self):
         print("Démarage")
@@ -49,12 +48,12 @@ class ApplicationPilulier:
         print(prescriptionSelectionnee)
         nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow()+1) + ".txt"
         self.lirePrescription(nomFichierPrescription)
+        self.afficherPrescription()
 
         self.prescriptionEnCoursIndex = 0 # sert à suivre où nous sommes rendu dans la distribution
         self.ui.messagesTextEdit.setText("Verser les pilules de type "
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
                                          +" dans le système.")
-        print(self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)
 
         # self.threadCommunication()
         t = threading.Thread(target=self.threadCommunication)
@@ -125,6 +124,13 @@ class ApplicationPilulier:
         vecteurPrescriptionPourTester = np.array([1, 0, 3, 0, 2, 1, 2], dtype=np.uint8)
 
         return vecteurDeDistribution
+
+    def afficherPrescription(self):
+        print("Voici la prescription sélectionnée :")
+        for pilules in self.prescription:
+            print(pilules.nom)
+            print(pilules.matriceDistribution)
+            
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
