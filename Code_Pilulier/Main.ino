@@ -18,7 +18,7 @@ int capPilPin = 1; //à modifier
 int capPurPin = 2; //à modifier
 int tailleVect[4]; 
 int pilParMoment[4];
-int compteur1 = 0, compteur2 = 0, distancePil1, distancePil2;
+int compteur1 = 0, compteur2 = 0, compteurTot, distancePil1, distancePil2;
 int momentEnCours = 0;
 byte deplacement[21][4];
 byte commande;
@@ -49,11 +49,13 @@ void setup() {
 void loop(){
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
+        //envoie message à l'interface pour dire que les trucs sont pas en place?
         if (digitalRead(capPilPin)){capteurPil = true;}
         if (digitalRead(capPurPin)){capteurPur = true;}
         if (capteurPil && capteurPur){ready = true;}
-        //envoie message à l'interface pour dire que les trucs sont pas en place?
     }
+
+    //CODE DE CALIBRATION : si on veut ajouter une calibration -> TODO
 
     if (ready){
         //Tant qu'il n'y a pas de byte à lire au port sériel, le programme reste dans la boucle
@@ -67,6 +69,8 @@ void loop(){
             //Acquisition du vecteur de taille des vecteurs déplacement/moment
             for(int i = 0; i<4; i++){
                 tailleVect[i] = Serial.read();
+                //Calcul du nombre de pilules par moment
+                pilParMoment[i] = tailleVect[i] - 1;
             }
             //Acquisition des vecteurs déplacements de chaque moment
             for(int j = 0; j<4;j++){
@@ -74,15 +78,8 @@ void loop(){
                     deplacement[k][j] = Serial.read();
                 }
             }
-            //Calcul du nombre de pilules par moment
-            for (int i = 0; i < 4; i++){
-                for (int k = 0; k < tailleVect[i]; k++){
-                    pilParMoment[i] += deplacement[i][k]; 
-                }
-                pilParMoment[i] -= 8; //si on garde le 8 à la fin des mvts pour signaler la fin
-            }
             
-            //lirePrescription();
+            //lirePrescription(); pu nécessaire je crois
             timePilule = milis();
             //départ moteur TODO : soit fct ou bien on fait juste envoyer la commande au moteur
             //Code de remplissage de prescription
@@ -92,9 +89,13 @@ void loop(){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         //Alerte, message interface manque de pilule -> TODO
+                        //arrêt des moteurs? si oui -> TODO
+                        //Boucle de lecture du port sériel en attente du signal de reprise?
+                        //si on fait ça -> TODO
                     }
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
+                    //Vérifie si une pilule passe devant le capteur1
                     if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
                         compteur1++;
                         timePilule = milis();
@@ -102,18 +103,38 @@ void loop(){
                             //fermer le moteur lent -> TODO
                         }
                     }
+                    //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
                         //send.deplacement[momentEnCours][compteur2] au slave compartimentation -> TODO
+                        compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
                             momentDone = true;
-                        }
-                        compteur2++;
+                            //send.deplacement[momentEnCours][compteur2] au slave compartimentation -> TODO
+                            //pour cette dernière ligne, consulter Jo et Sto pour savoir 
+                        } 
                     }
                 }
                 //send momentEnCours au slave cassette -> TODO
+                if(compteur1 > compteur2){
+                    compteurTot += compteur2;
+                    compteur1 = compteur1 - compteur2;
+                    compteur2 = 0;
+                } else if(compteur2 > compteur1){
+                    compteurTot += compteur2;
+                    //purge partielle?
+                    //sinon stop moteur lent
+                    //compteur2 = 0;
+                    //compteur1 = 0;
+                } else {
+                    compteurTot += compteur2;
+                    compteur1 = 0;
+                    compteur2 = 0;
+                }
+
                 momentEnCours++;
                 if(momentEnCours > 3){
                     PrescDone = true;
+                    break;
                 }
             }
             
