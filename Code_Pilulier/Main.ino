@@ -49,7 +49,7 @@ void setup() {
 void loop(){
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
-        //envoie message à l'interface pour dire que les trucs sont pas en place?
+        //envoie message à l'interface pour dire que les trucs sont pas en place -> TODO
         if (digitalRead(capPilPin)){capteurPil = true;}
         if (digitalRead(capPurPin)){capteurPur = true;}
         if (capteurPil && capteurPur){ready = true;}
@@ -82,6 +82,7 @@ void loop(){
             //lirePrescription(); pu nécessaire je crois
             timePilule = milis();
             //départ moteur TODO : soit fct ou bien on fait juste envoyer la commande au moteur
+
             //Code de remplissage de prescription
             //Boucle pour une prescription 
             while(PrescDone == false){
@@ -89,8 +90,7 @@ void loop(){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         //Alerte, message interface manque de pilule -> TODO
-                        //arrêt des moteurs? si oui -> TODO
-                        //Boucle de lecture du port sériel en attente du signal de reprise?
+                        //Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
                         //si on fait ça -> TODO
                     }
                     distancePil1 = sensor1.readRangeSingleMillimeters();
@@ -99,18 +99,17 @@ void loop(){
                     if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
                         compteur1++;
                         timePilule = milis();
-                        if(compteur1 == pilParMoment[momentEnCours]){
+                        if(compteur1 == [momentpilParMomentEnCours]){
                             //fermer le moteur lent -> TODO
                         }
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
-                        //send.deplacement[momentEnCours][compteur2] au slave compartimentation -> TODO
+                        //send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
                             momentDone = true;
                             //send.deplacement[momentEnCours][compteur2] au slave compartimentation -> TODO
-                            //pour cette dernière ligne, consulter Jo et Sto pour savoir 
                         } 
                     }
                 }
