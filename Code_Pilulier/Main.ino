@@ -30,6 +30,8 @@ const int DIST_REF2 = 20;
 const int DIST_SEUIL1 = 10;
 const int DIST_SEUIL2 = 10;
 const int TEMPS_MAX = 10;
+const int ADRESSE_COMP = 10;
+const int ADRESSE_DIST = 11;
 
 //pas nécessaire finalement je crois
 void lirePrescription() {
@@ -86,6 +88,7 @@ void loop(){
             //Code de remplissage de prescription
             //Boucle pour une prescription 
             while(PrescDone == false){
+                //if(tailleVect[momentEnCours != 0]){  pour lorsque pas de pill dans momentenCours
                 while(momentDone == false){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
@@ -99,7 +102,7 @@ void loop(){
                     if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
                         compteur1++;
                         timePilule = milis();
-                        if(compteur1 == [momentpilParMomentEnCours]){
+                        if(compteur1 == pilParMoment[momentEnCours]){
                             //fermer le moteur lent -> TODO
                         }
                     }
@@ -112,14 +115,15 @@ void loop(){
                             //boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
                             //une fois reçu --> 
                             //send.deplacement[momentEnCours][compteur2] (i.e. 8) au slave compartimentation -> TODO
-                            //Wire.beginTransmission(addresseSlave)
+                            //Wire.beginTransmission(ADRESSE_COMP)
                             //Wire.write(int)
                             //Wire.endTransmission()
+                            //stop moteur rapide après qu'elle tombe (TEST)
                         } 
                     }
                 }
                 //send momentEnCours au slave cassette -> TODO
-                //Wire.beginTransmission(addresseSlave)
+                //Wire.beginTransmission(ADRESSE_DIST)
                 //Wire.write(int)
                 //Wire.endTransmission()
                 if(compteur1 > compteur2){
@@ -141,6 +145,7 @@ void loop(){
                 momentEnCours++;
                 if(momentEnCours > 3){
                     PrescDone = true;
+                    //Purge complète
                     break;
                 }
             }
