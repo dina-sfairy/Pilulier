@@ -34,19 +34,5 @@ void loop() {
     digitalWrite(13, state);
 }
 
-/* À écrire dans le MÉGA
- *  const byte pinInterruptSensor = 2;
- * void setup() {
- * ...
- * attachInterrupt(digitalPinToInterrupt(pinInterruptSensor), piluleDectecteeSep, RISING);
- * ...
- * } 
- * 
- * void piluleDetecteeSep() {
- * Wire.beginTransmission(11);                          // transmit to device #11
- * Wire.write(deplacement[momentEnCours][compteur2]);   // sends x 
- * Wire.endTransmission();                              // stop transmitting
- * }
 
-*/
 
