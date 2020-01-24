@@ -109,11 +109,19 @@ void loop(){
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
                             momentDone = true;
-                            //send.deplacement[momentEnCours][compteur2] au slave compartimentation -> TODO
+                            //boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
+                            //une fois reçu --> 
+                            //send.deplacement[momentEnCours][compteur2] (i.e. 8) au slave compartimentation -> TODO
+                            //Wire.beginTransmission(addresseSlave)
+                            //Wire.write(int)
+                            //Wire.endTransmission()
                         } 
                     }
                 }
                 //send momentEnCours au slave cassette -> TODO
+                //Wire.beginTransmission(addresseSlave)
+                //Wire.write(int)
+                //Wire.endTransmission()
                 if(compteur1 > compteur2){
                     compteurTot += compteur2;
                     compteur1 = compteur1 - compteur2;
