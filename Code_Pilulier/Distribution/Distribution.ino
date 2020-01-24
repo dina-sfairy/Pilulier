@@ -24,6 +24,9 @@ int etape;
 int servoPin;
 int homePosition;
 int posAjustement;
+int nbSteps;
+int compteurAjustement;
+
 // Create a servo object 
 Servo Servo1;
 
@@ -40,10 +43,12 @@ void setup() {
 	Wire.onRequest(requestEvent);
 	retour = false; 
 	etape = 2;
-	pos = 0;
+	pos = 1;
 	momentJournee = 0;
 	servoPin = 3;
+	nbSteps = 0;
 	posAjustement = (int)(100 / PI);
+	compteurAjustement = 0;
 	Servo1.attach(servoPin);
 	Servo1.write(163); // À ajuster en fonction de la position réelle pour que la trappe soit horizontale initialement
 	delay(500);
@@ -51,17 +56,20 @@ void setup() {
 
 }
 void receiveEvent(int bytes) {
+	nbSteps = 0;
+	compteurAjustement = 0;
 	//pos = 1600 * Wire.read();  // Pour les PIN MS1 et MS2 connectés au ground du EasyDriver, 400 steps = 1 tour
 	momentJournee = Wire.read();
 	Serial.println(momentJournee);
 	etape = 1;
-	// retour = false;
-	pos = 0;
+	retour = true;
+	// pos = 0;
 
 	switch (momentJournee)
 	{
 	case 1:
-		retour = true;
+		pos = (int)(20 * 57 / PI); // Les calculs assument 1 tour = 400 steps
+		retour = false;
 		break;
 	case 2:
 		pos = (int)(20 * 57 / PI); // Les calculs assument 1 tour = 400 steps
@@ -81,8 +89,15 @@ void receiveEvent(int bytes) {
 	}
 	// Si MS1 et MS2 ne sont pas connectés au ground, 1600 steps = 1 tour
 	Serial.println(momentJournee);
-	ASstepper2.setCurrentPosition(0);
-	ASstepper2.moveTo(pos);
+	Serial.println(pos);
+	if (pos > 0) {
+		ASstepper2.setCurrentPosition(0);
+		ASstepper2.moveTo(pos);
+	}
+	else {
+		Serial.println("Position 0");
+	}
+	
 
 }
 
@@ -93,6 +108,38 @@ void requestEvent() {
 
 void loop() {
 
+	ASstepper2.run();
+	nbSteps++;
+	if (ASstepper2.distanceToGo() == 0 && !retour && nbSteps == pos && etape == 1) {
+		Servo1.write(Servo1.read() - 60);
+		delay(500);
+		Servo1.write(Servo1.read() + 60);
+		delay(500);
+		ASstepper2.moveTo(0);
+		etape++;
+		nbSteps = 0;
+	}
+	else if (ASstepper2.distanceToGo() == 0 && etape == 2) {
+		if (digitalRead(6) != 0) {
+			compteurAjustement++;
+			ASstepper2.moveTo(-compteurAjustement*posAjustement);
+			nbSteps = 0;
+		}
+		else
+		{
+			retour = true;
+			etape = 1;
+			momentJournee = 0;
+			pos = 0;
+			nbSteps = 0;
+		}
+	}
+
+	
+
+
+	// Première version du code semi-problématique
+	/*
 	ASstepper2.run();
 	if (ASstepper2.distanceToGo() == 0) {
 
@@ -122,5 +169,7 @@ void loop() {
 
 
 	}
+
+	*/
 
 }
