@@ -97,7 +97,14 @@
     <item>
      <widget class="QPushButton" name="boutonDemarer">
       <property name="text">
-       <string>Démarer</string>
+       <string>Démarrer</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="boutonRedemarrer">
+      <property name="text">
+       <string>Redémarrer</string>
       </property>
      </widget>
     </item>
