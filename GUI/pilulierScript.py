@@ -6,10 +6,12 @@ import serial
 import time
 import threading
 
+
 class PilulePrescrite:
     def __init__(self, nom, matriceDistribution):
         self.nom = nom
         self.matriceDistribution = matriceDistribution
+
 
 class ApplicationPilulier:
     def __init__(self, MainWindow):
@@ -17,12 +19,14 @@ class ApplicationPilulier:
         self.ui.setupUi(MainWindow)
         self.ui.messagesTextEdit.setReadOnly(True)
         self.ui.boutonArreter.setEnabled(False)
-        self.ui.listePrescriptions.setCurrentRow(0) # Par défaut, PyQt retourne 0 lorsqu'on appelle currentRow. Cette
-                                                    # ligne fait ensorte que l'item soit surligné au démarage.
+        self.ui.boutonRedemarrer.setEnabled(False)
+        self.ui.listePrescriptions.setCurrentRow(0)  # Par défaut, PyQt retourne 0 lorsqu'on appelle currentRow. Cette
+        # ligne fait ensorte que l'item soit surligné au démarage.
 
         # Connecter les boutons aux méthodes qui leur sont associées
         self.ui.boutonDemarer.clicked.connect(self.onDemarerClicked)
         self.ui.boutonArreter.clicked.connect(self.onArreterClicked)
+        self.ui.boutonRedemarrer.clicked.connect(self.onRedemarrerClicked)
 
         # Créer un timer qui va refresh les instructions lorsque nécéssaire
         self.checkMessageTimer = QtCore.QTimer()
@@ -38,7 +42,7 @@ class ApplicationPilulier:
 
         # Démarer la communication avec l'arduino
         self.serPort = serial.Serial('COM6', 9600)
-        time.sleep(3) # Il faut donner le temps au Arduino de reset
+        time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
         print("Démarage")
@@ -46,37 +50,100 @@ class ApplicationPilulier:
         self.ui.boutonArreter.setEnabled(True)
         prescriptionSelectionnee = self.ui.listePrescriptions.currentItem().text()
         print(prescriptionSelectionnee)
-        nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow()+1) + ".txt"
+        nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow() + 1) + ".txt"
         self.lirePrescription(nomFichierPrescription)
         self.afficherPrescription()
 
-        self.prescriptionEnCoursIndex = 0 # sert à suivre où nous sommes rendu dans la distribution
+        self.prescriptionEnCoursIndex = 0  # sert à suivre où nous sommes rendu dans la distribution
         self.ui.messagesTextEdit.setText("Verser les pilules de type "
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
-                                         +" dans le système.")
+                                         + " dans le système.")
 
         # self.threadCommunication()
         t = threading.Thread(target=self.threadCommunication)
         t.start()
+
+    def onRedemarrerClicked(self):
+        self.systemControl = 2
+        self.ui.boutonArreter.setEnabled(True)
+        self.ui.boutonRedemarrer.setEnabled(False)
 
     def onArreterClicked(self):
         print("Arrêt")
         self.systemControl = 1
 
     def threadCommunication(self):
-        self.serPort.write(bytes([10]))
-        while not (self.serPort.in_waiting):
-            if self.systemControl == 1:
-                self.serPort.write(bytes([11]))
+        # Envoyer le signal de départ
+        self.serPort.write(bytes([1]))
+        # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
+        self.envoyerMatrice(self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
+        # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
+        # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
+
+        while(self.prescriptionEnCoursIndex < self.prescription.__len__()):
+            self.serPort.write(bytes([1]))
+            # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
+            self.envoyerMatrice(self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
+            # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
+            # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
+
+            # Attendre de recevoir une réponse du microcontroleur
+            while not (self.serPort.in_waiting):
+                if self.systemControl == 1:  # L'utilisateur a appuyé sur le bouton d'arrêt
+                    self.serPort.write(bytes([2]))
+                    self.systemControl = 0
+                time.sleep(0.200)
+
+            # Lire le message du uC
+            ligneLue = self.serPort.readline()
+            print(ligneLue)
+            ligneLue = str(ligneLue.decode('utf-8'))
+            print(ligneLue)
+            if (ligneLue == "e1"):
+                self.messageAAfficher = "Le pilulier est mal placé."
+                self.messageNeedsUpdate = True
+                self.ui.boutonArreter.setEnabled(False)
+                self.ui.boutonDemarer.setEnabled(True)
+                return
+            elif (ligneLue == "e2"):
+                self.messageAAfficher = "Le contenant de purge est mal placé."
+                self.messageNeedsUpdate = True
+                self.ui.boutonArreter.setEnabled(False)
+                self.ui.boutonDemarer.setEnabled(True)
+                return
+            elif (ligneLue == "e3"):
+                self.messageAAfficher = "Veuillez ajouter plus de pillules du type " \
+                                        + self.prescription[self.prescriptionEnCoursIndex].nom + " dans le système" \
+                                        + " et appuyez sur le bouton 'redémarrer'."
+                self.ui.boutonArreter.setEnabled(False)
+                self.ui.boutonRedemarrer.setEnabled(True)
+                while(self.systemControl is not 2): # L'utilisateur doit appuyer sur le bouton redémarrer
+                    time.sleep(0.2)
                 self.systemControl = 0
-            time.sleep(0.200)
-        ligneLue = self.serPort.readline()
-        print(ligneLue)
-        ligneLue = str(ligneLue.decode('utf-8'))
-        self.messageAAfficher = ligneLue
+                self.serPort.write(bytes([3]))
+
+            elif (ligneLue == "ok"):
+                self.messageAAfficher = "Arrêt du système."
+                self.messageNeedsUpdate = True
+                self.ui.boutonArreter.setEnabled(False)
+                self.ui.boutonDemarer.setEnabled(True)
+                return
+            elif (ligneLue == "f"):
+                self.prescriptionEnCoursIndex = self.prescriptionEnCoursIndex + 1
+                self.messageAAfficher = "Verser les pilules de type " \
+                                        + self.prescription[self.prescriptionEnCoursIndex].nom \
+                                        + " dans le système."
+                self.messageNeedsUpdate = True
+                time.sleep(0.3)
+            else:
+                print("Commande non-reconnue")
+                return
+        self.serPort.write(bytes([4]))
+        self.messageAAfficher("La prescription est terminée.")
         self.messageNeedsUpdate = True
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
+        return
 
     def envoyerMatrice(self, matricePrescription):
         for i in range(7):
@@ -95,7 +162,7 @@ class ApplicationPilulier:
         # Lire le fichier de prescription
         fichierPrescription = open(nomFichierPrescription, "r")
         nomPillule = fichierPrescription.readline().split()[0]
-        while(nomPillule != "fin"):
+        while (nomPillule != "fin"):
             matricePrescription = np.zeros([7, 4], dtype=np.uint8)
             for i in range(7):
                 ligneLue = fichierPrescription.readline().split()
@@ -150,7 +217,7 @@ class ApplicationPilulier:
         for pilules in self.prescription:
             print(pilules.nom)
             print(pilules.matriceDistribution)
-            
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
@@ -159,4 +226,3 @@ if __name__ == "__main__":
     ui = appliPilulier.ui
     MainWindow.show()
     sys.exit(app.exec_())
-    
