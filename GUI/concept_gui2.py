@@ -59,6 +59,9 @@ class Ui_MainWindow(object):
         self.boutonDemarer = QtWidgets.QPushButton(self.centralwidget)
         self.boutonDemarer.setObjectName("boutonDemarer")
         self.verticalLayout.addWidget(self.boutonDemarer)
+        self.boutonRedemarrer = QtWidgets.QPushButton(self.centralwidget)
+        self.boutonRedemarrer.setObjectName("boutonRedemarrer")
+        self.verticalLayout.addWidget(self.boutonRedemarrer)
         self.boutonArreter = QtWidgets.QPushButton(self.centralwidget)
         self.boutonArreter.setObjectName("boutonArreter")
         self.verticalLayout.addWidget(self.boutonArreter)
@@ -91,7 +94,8 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "demo"))
         self.listePrescriptions.setSortingEnabled(__sortingEnabled)
         self.label_2.setText(_translate("MainWindow", "Instructions"))
-        self.boutonDemarer.setText(_translate("MainWindow", "Démarer"))
+        self.boutonDemarer.setText(_translate("MainWindow", "Démarrer"))
+        self.boutonRedemarrer.setText(_translate("MainWindow", "Redémarrer"))
         self.boutonArreter.setText(_translate("MainWindow", "Arrêter"))
 
 
