@@ -10,7 +10,5 @@ Author:   Dina Sfairy
 #include <Wire.h>
 #include <VL53L0X.h>
 
-void calibration()
-void departMoteursSeparation()
-void ArretMoteurLent()
+void purgePartielle(moteurLent, 
 
