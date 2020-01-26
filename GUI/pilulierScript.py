@@ -106,17 +106,22 @@ class ApplicationPilulier:
             nomPillule = fichierPrescription.readline().split()[0]
         fichierPrescription.close()
 
-    def genererVecteurDeDistribution(self, ligneDePrescription):
+    def genererVecteurDeDistribution(self, matriceDeDistribution):
         """
         Cette méthode génère un vecteur de distribution
-        :param ligneDePrescription: Vecteur represantant, pour une pilule donnée, la quantité à placer dans le pilulier
-         à chaque jour de la semaine pour un momment donné de la journée
-        :type ligneDePrescription: NumPy array 1D avec 7 éléments
-        :return: vecteur décrivant combien de cases il faut déplacer le tapis de compartimentation à chaque étape de
+        :param matriceDeDistribution: matrice represantant, pour une pilule donnée, la quantité à placer dans le pilulier
+         à chaque jour de la semaine selon le moment de la journée
+        :type matriceDeDistribution: NumPy array de taille 7x4 (7 lignes, 4 colonnes)
+        :return vecteurTaille: Vecteur contenant le nombre d'éléments à envoyer pour chaque moment de la journée
+        :rtype NumPy array 1D avec une taille de 4
+        :return matriceDeDeplacement: Matrice décrivant combien de cases il faut déplacer le tapis de compartimentation à chaque étape de
         celui-ci pour la pilule donnée.
-        :rtype: NumPy array 1D avec un nombre maximal de 21 éléments
+        :rtype matriceDeDeplacement: NumPy array de taille 21x4
         """
-        # TODO: Creer le vecteur de distribution
+        # TODO: Creer le vecteur de taille et la matrice de distribution
+        vecteurTaille = np.zeros(4, dtype=np.uint8)
+        matriceDeDeplacement = np.zeros([21, 4], dtype=np.uint8)
+
         vecteurDeDistribution = np.array([], dtype=np.uint8)
 
         # Initialiser le compteur d'incréments
@@ -138,7 +143,7 @@ class ApplicationPilulier:
         # Pour des fins de tests voici un vecteur de prescription pour faire tes tests
         # vecteurPrescriptionPourTester = np.array([1, 0, 3, 0, 2, 1, 2], dtype=np.uint8)
 
-        return vecteurDeDistribution
+        return vecteurTaille, vecteurDeDistribution
 
     def afficherPrescription(self):
         print("Voici la prescription sélectionnée :")
@@ -154,3 +159,4 @@ if __name__ == "__main__":
     ui = appliPilulier.ui
     MainWindow.show()
     sys.exit(app.exec_())
+    
