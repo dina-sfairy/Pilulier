@@ -33,6 +33,10 @@ const int TEMPS_MAX = 10;
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 
+// Connecter un DC motor au port M1
+Adafruit_DCMotor* DClent = AFMS.getMotor(1);
+Adafruit_DCMotor* DCrapide = AFMS.getMotor(2);
+
 //pas nécessaire finalement je crois
 void lirePrescription() {
   for (byte i = 0; i < 7; i++) {
@@ -46,6 +50,14 @@ void setup() {
     //déterminer adresse capteur
     //mesure valeur référence des capteurs
     enMarche = false;
+
+    // DC motor tapis lent
+    DClent->setSpeed(200);
+    DClent->run(RELEASE);
+
+    // DC motor tapis rapide
+    DCrapide->setSpeed(200);
+    DCrapide->run(RELEASE);
 }
 
 void loop(){
@@ -83,7 +95,7 @@ void loop(){
             
             //lirePrescription(); pu nécessaire je crois
             timePilule = milis();
-            //départ moteur TODO : soit fct ou bien on fait juste envoyer la commande au moteur
+            DClent->run(FORWARD); // Démarrer moteur lent de séparation
 
             //Code de remplissage de prescription
             //Boucle pour une prescription 
@@ -92,7 +104,8 @@ void loop(){
                 while(momentDone == false){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
-                        //Alerte, message interface manque de pilule -> TODO
+                        Serial.println("e");
+                        Serial.println("Manque de pilules. Veuillez en rajouter et peser sur 'Redémarrer'");
                         //Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
                         //si on fait ça -> TODO
                     }
@@ -103,7 +116,8 @@ void loop(){
                         compteur1++;
                         timePilule = milis();
                         if(compteur1 == pilParMoment[momentEnCours]){
-                            //fermer le moteur lent -> TODO
+                            DClent->run(RELEASE);
+                            // Il faut que le bouton 'Redémarrer' recommence le moteur -> TODO
                         }
                     }
                     //Vérifie si une pilule passe devant le capteur2
@@ -118,7 +132,7 @@ void loop(){
                             //Wire.beginTransmission(ADRESSE_COMP)
                             //Wire.write(int)
                             //Wire.endTransmission()
-                            //stop moteur rapide après qu'elle tombe (TEST)
+                            DCrapide->run(RELEASE);
                         } 
                     }
                 }
