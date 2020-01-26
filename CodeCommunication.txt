@@ -1,0 +1,16 @@
+Code de Comm de l'interface au mega
+
+1 = démarrer
+2 = stop
+3 = redémarrer
+4 = purge complète
+
+
+
+Code de Comm du mega à l'interface
+
+erreur pilulier mal placé = Serial.println("e1")
+erreur purge mal placée = "e2"
+manque de pilule = "e3"
+type de pilule fini = "f"
+confirmation d'arrêt du système = "ok"

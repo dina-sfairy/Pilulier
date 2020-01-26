@@ -35,19 +35,9 @@ const int ADRESSE_DIST = 11;
 
 // Connecter un DC motor au port M1
 Adafruit_DCMotor* DClent = AFMS.getMotor(1);
-Adafruit_DCMotor* DCrapide = AFMS.getMotor(2);
-
-//pas nécessaire finalement je crois
-void lirePrescription() {
-  for (byte i = 0; i < 7; i++) {
-    for (byte j = 0; j < 4; j++) {
-      matricePrescription[i][j] = Serial.read();
-    }
-  }
-}
+Adafruit_DCMotor* DCrapide = AFMS.getMotor(3);
 
 void setup() {
-    //déterminer adresse capteur
     //mesure valeur référence des capteurs
     enMarche = false;
 
@@ -63,7 +53,7 @@ void setup() {
 void loop(){
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
-        //envoie message à l'interface pour dire que les trucs sont pas en place -> TODO
+        //envoie message pour chaque cas à l'interface pour dire que les trucs sont pas en place -> TODO
         if (digitalRead(capPilPin)){capteurPil = true;}
         if (digitalRead(capPurPin)){capteurPur = true;}
         if (capteurPil && capteurPur){ready = true;}
@@ -93,21 +83,23 @@ void loop(){
                 }
             }
             
-            //lirePrescription(); pu nécessaire je crois
             timePilule = milis();
             DClent->run(FORWARD); // Démarrer moteur lent de séparation
 
             //Code de remplissage de prescription
             //Boucle pour une prescription 
             while(PrescDone == false){
-                //if(tailleVect[momentEnCours != 0]){  pour lorsque pas de pill dans momentenCours
+                while(tailleVect[momentEnCours] == 0){
+                    momentEnCours++;
+                }
+                //start moteur -> TODO
                 while(momentDone == false){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
-                        Serial.println("e");
-                        Serial.println("Manque de pilules. Veuillez en rajouter et peser sur 'Redémarrer'");
+                        Serial.println("e3");
                         //Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
                         //si on fait ça -> TODO
+                        //timePilule = milis();
                     }
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
@@ -125,9 +117,11 @@ void loop(){
                         //send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
+                            //fermer moteur
                             momentDone = true;
                             //boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
-                            //une fois reçu --> 
+                            //une fois reçu --> Wire.requestFrom(ADRESSE, 1);
+                            
                             //send.deplacement[momentEnCours][compteur2] (i.e. 8) au slave compartimentation -> TODO
                             //Wire.beginTransmission(ADRESSE_COMP)
                             //Wire.write(int)
@@ -155,11 +149,12 @@ void loop(){
                     compteur1 = 0;
                     compteur2 = 0;
                 }
-
+                momentDone = false;
                 momentEnCours++;
                 if(momentEnCours > 3){
                     PrescDone = true;
                     //Purge complète
+                    //send "f" à l'interface pour dire que prescription finie
                     break;
                 }
             }
