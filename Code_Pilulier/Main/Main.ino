@@ -53,7 +53,7 @@ void setup() {
 void loop(){
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
-        //envoie message pour chaque cas à l'interface pour dire que les trucs sont pas en place -> TODO
+        //DINA envoie message pour chaque cas à l'interface pour dire que les trucs sont pas en place -> TODO
         if (digitalRead(capPilPin)){capteurPil = true;}
         if (digitalRead(capPurPin)){capteurPur = true;}
         if (capteurPil && capteurPur){ready = true;}
@@ -92,12 +92,12 @@ void loop(){
                 while(tailleVect[momentEnCours] == 0){
                     momentEnCours++;
                 }
-                //start moteur -> TODO
+                //DINA start moteur -> TODO
                 while(momentDone == false){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         Serial.println("e3");
-                        //Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
+                        //BEIKS Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
                         //si on fait ça -> TODO
                         //timePilule = milis();
                     }
@@ -114,12 +114,12 @@ void loop(){
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
-                        //send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
+                        //BEIKS send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
-                            //fermer moteur
+                            //DINA fermer moteur
                             momentDone = true;
-                            //boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
+                            //BEIKS boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
                             //une fois reçu --> Wire.requestFrom(ADRESSE, 1);
                             
                             //send.deplacement[momentEnCours][compteur2] (i.e. 8) au slave compartimentation -> TODO
@@ -130,7 +130,7 @@ void loop(){
                         } 
                     }
                 }
-                //send momentEnCours au slave cassette -> TODO
+                //BEIKS send momentEnCours au slave cassette -> TODO
                 //Wire.beginTransmission(ADRESSE_DIST)
                 //Wire.write(int)
                 //Wire.endTransmission()
@@ -140,7 +140,7 @@ void loop(){
                     compteur2 = 0;
                 } else if(compteur2 > compteur1){
                     compteurTot += compteur2;
-                    //purge partielle?
+                    //DINA purge partielle?
                     //sinon stop moteur lent
                     //compteur2 = 0;
                     //compteur1 = 0;
@@ -153,15 +153,11 @@ void loop(){
                 momentEnCours++;
                 if(momentEnCours > 3){
                     PrescDone = true;
-                    //Purge complète
-                    //send "f" à l'interface pour dire que prescription finie
+                    //DINA Purge complète
+                    //DINA send "f" à l'interface pour dire que prescription finie
                     break;
                 }
             }
-            
-            
-
         }
-
     }
 }
