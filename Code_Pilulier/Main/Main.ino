@@ -16,8 +16,8 @@ int capPilPin = 1; //à modifier
 int capPurPin = 2; //à modifier
 int tailleVect[4]; 
 int pilParMoment[4];
-int compteur1 = 0, compteur2 = 0, compteurTot, distancePil1, distancePil2;
-int momentEnCours = 0;
+int compteur1, compteur2, compteurTot, distancePil1, distancePil2;
+int momentEnCours;
 byte deplacement[21][4];
 byte commande;
 byte matricePrescription[7][4];
@@ -35,8 +35,28 @@ const int ADRESSE_DIST = 11;
 Adafruit_DCMotor* DClent = AFMS.getMotor(1);
 Adafruit_DCMotor* DCrapide = AFMS.getMotor(3);
 
+//Initialisation des variables
+void init(){
+    compteur1 = 0;
+    compteur2 = 0;
+    compteurTot = 0;
+    timeActuel = 0;
+    timePilule = 0;
+    momentEnCours = 0;
+    capteurPil = false;
+    capteurPur = false;
+    ready = false;
+    enMarche = false;
+    momentDone = false;
+    PrescDone = false;
+    memset(tailleVect, 0, sizeof(tailleVect));
+    memset(pilParMoment, 0, sizeof(pilParMoment));
+    memset(deplacement, 0, sizeof(deplacement));
+}
+
 void setup() {
     //mesure valeur référence des capteurs
+    //associer les sensors aux capteurs
     enMarche = false;
 
     // DC motor tapis lent
@@ -44,10 +64,11 @@ void setup() {
 
     // DC motor tapis rapide
     DCrapide->setSpeed(300); // À déterminer
+    init();
 }
 
 void loop(){
-    //fonction de reset -> TODO
+    init();
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
         if (digitalRead(capPilPin)){capteurPil = true;}
