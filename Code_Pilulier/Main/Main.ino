@@ -9,6 +9,7 @@
 #include <AccelStepper.h>
 #include <Wire.h>
 #include <VL53L0X.h>
+#include <AFMotor.h>
 
 VL53L0X sensor1, sensor2; 
 bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone;
@@ -32,6 +33,7 @@ const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 
 // Connecter un DC motor au port M1 et l'autre au port M3
+//Ici il faut définir les trucs
 Adafruit_DCMotor* DClent = AFMS.getMotor(1);
 Adafruit_DCMotor* DCrapide = AFMS.getMotor(3);
 
