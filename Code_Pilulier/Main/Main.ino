@@ -4,8 +4,6 @@
  Author:	Beiko
 */
 
-
-
 #include <Servo.h>
 #include <MultiStepper.h>
 #include <AccelStepper.h>
@@ -102,9 +100,12 @@ void loop(){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         Serial.println("e3");
-                        //BEIKS Boucle de lecture du port sériel en attente du signal de reprise - surtout reset timer
-                        //si on fait ça -> TODO
-                        //timePilule = milis();
+                        while(Serial.available()==0){
+                        }
+                        commande = Serial.read();
+                        if(commande == 3){
+                            timePilule = milis();
+                        } //else envoyer message à l'interface pour commande erronnée?
                     }
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
@@ -119,25 +120,29 @@ void loop(){
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
-                        //BEIKS send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
+                        Wire.beginTransmission(ADRESSE_COMP);
+                        Wire.write(deplacement[compteur2][momentEnCours]);
+                        Wire.endTransmission();                        
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
                             DCrapide->run(RELEASE);
                             momentDone = true;
-                            //BEIKS boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
-                            //une fois reçu --> Wire.requestFrom(ADRESSE, 1);
-                            
-                            //send.deplacement[momentEnCours][compteur2] (i.e. 8) au slave compartimentation -> TODO
-                            //Wire.beginTransmission(ADRESSE_COMP)
-                            //Wire.write(int)
-                            //Wire.endTransmission()
+                            //Attend que cassette soit en place et qu'elle envoie son status
+                            while(Wire.requestFrom(ADRESSE_DIST,1)==0){
+                            }
+                            Wire.beginTransmission(ADRESSE_COMP);
+                            Wire.write(deplacement[compteur2][momentEnCours]);
+                            Wire.endTransmission();
                         } 
                     }
                 }
-                //BEIKS send momentEnCours au slave cassette -> TODO
-                //Wire.beginTransmission(ADRESSE_DIST)
-                //Wire.write(int)
-                //Wire.endTransmission()
+                //Attend que le tapis de compartimentation soit en place
+                while(Wire.requestFrom(ADRESSE_COMP)==0){
+                }
+                Wire.beginTransmission(ADRESSE_DIST);
+                Wire.write(momentEnCours);
+                Wire.endTransmission();
+                
                 if(compteur1 > compteur2){
                     compteurTot += compteur2;
                     compteur1 = compteur1 - compteur2;
