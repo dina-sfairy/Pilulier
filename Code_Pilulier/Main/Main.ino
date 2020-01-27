@@ -47,6 +47,7 @@ void setup() {
 }
 
 void loop(){
+    //fonction de reset -> TODO
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
         if (digitalRead(capPilPin)){capteurPil = true;}
@@ -149,10 +150,9 @@ void loop(){
                     compteur2 = 0;
                 } else if(compteur2 > compteur1){
                     compteurTot += compteur2;
-                    purgePartielle() // ???
-                    //sinon stop moteur lent
-                    //compteur2 = 0;
-                    //compteur1 = 0;
+                    purgePartielle(); // ???
+                    compteur2 = 0;
+                    compteur1 = 0;
                 } else {
                     compteurTot += compteur2;
                     compteur1 = 0;
@@ -174,9 +174,11 @@ void loop(){
 void purgePartielle() {
   DClent->run(RELEASE);
   DCrapide->run(BACKWARD); // pour combien de temps?
-  }
+  //fermer moteur à la fin
+}
 
 void purgeComplete() {
   DClent->setSpeed(500); // À déterminer
   DCrapide->run(BACKWARD); // pour combien de temps?
-  }
+  //fermer les deux moteurs à la fin - à voir selon quand on demande une purge partielle
+}
