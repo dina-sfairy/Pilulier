@@ -33,7 +33,7 @@ const int TEMPS_MAX = 10;
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 
-// Connecter un DC motor au port M1
+// Connecter un DC motor au port M1 et l'autre au port M3
 Adafruit_DCMotor* DClent = AFMS.getMotor(1);
 Adafruit_DCMotor* DCrapide = AFMS.getMotor(3);
 
@@ -42,20 +42,25 @@ void setup() {
     enMarche = false;
 
     // DC motor tapis lent
-    DClent->setSpeed(200);
-    DClent->run(RELEASE);
+    DClent->setSpeed(200); // À déterminer
 
     // DC motor tapis rapide
-    DCrapide->setSpeed(200);
-    DCrapide->run(RELEASE);
+    DCrapide->setSpeed(300); // À déterminer
 }
 
 void loop(){
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(!ready){
-        //DINA envoie message pour chaque cas à l'interface pour dire que les trucs sont pas en place -> TODO
         if (digitalRead(capPilPin)){capteurPil = true;}
+        else {
+          Serial.println("e1");
+          Serial.println("Veuillez bien insérer le pilulier");
+        }
         if (digitalRead(capPurPin)){capteurPur = true;}
+        else {
+          Serial.println("e2");
+          Serial.println("Veuillez bien insérer le récipient de purge");
+          }
         if (capteurPil && capteurPur){ready = true;}
     }
 
@@ -92,7 +97,7 @@ void loop(){
                 while(tailleVect[momentEnCours] == 0){
                     momentEnCours++;
                 }
-                //DINA start moteur -> TODO
+                DCrapide->run(FORWARD);
                 while(momentDone == false){
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
@@ -117,7 +122,7 @@ void loop(){
                         //BEIKS send.deplacement[compteur2][momentEnCours] au slave compartimentation -> TODO
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
-                            //DINA fermer moteur
+                            DCrapide->run(RELEASE);
                             momentDone = true;
                             //BEIKS boucle while byte sur état de cassette est pas positif lecture et attente -> TODO
                             //une fois reçu --> Wire.requestFrom(ADRESSE, 1);
@@ -126,7 +131,6 @@ void loop(){
                             //Wire.beginTransmission(ADRESSE_COMP)
                             //Wire.write(int)
                             //Wire.endTransmission()
-                            DCrapide->run(RELEASE);
                         } 
                     }
                 }
@@ -140,7 +144,7 @@ void loop(){
                     compteur2 = 0;
                 } else if(compteur2 > compteur1){
                     compteurTot += compteur2;
-                    //DINA purge partielle?
+                    purgePartielle() // ???
                     //sinon stop moteur lent
                     //compteur2 = 0;
                     //compteur1 = 0;
@@ -153,11 +157,21 @@ void loop(){
                 momentEnCours++;
                 if(momentEnCours > 3){
                     PrescDone = true;
-                    //DINA Purge complète
-                    //DINA send "f" à l'interface pour dire que prescription finie
+                    purgeComplete();
+                    Serial.println("f");
                     break;
                 }
             }
         }
     }
 }
+
+void purgePartielle() {
+  DClent->run(RELEASE);
+  DCrapide->run(BACKWARD); // pour combien de temps?
+  }
+
+void purgeComplete() {
+  DClent->setSpeed(500); // À déterminer
+  DCrapide->run(BACKWARD); // pour combien de temps?
+  }
