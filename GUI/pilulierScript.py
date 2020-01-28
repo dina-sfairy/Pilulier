@@ -42,7 +42,7 @@ class ApplicationPilulier:
         self.systemControl = 0
 
         # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM6', 9600)
+        self.serPort = serial.Serial('COM4', 115200)
         time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
@@ -82,12 +82,6 @@ class ApplicationPilulier:
         # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
 
         while(self.prescriptionEnCoursIndex < self.prescription.__len__()):
-            self.serPort.write(bytes([1]))
-            # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
-            self.envoyerMatrice(self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
-            # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
-            # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
-
             # Attendre de recevoir une réponse du microcontroleur
             while not (self.serPort.in_waiting):
                 if self.systemControl == 1:  # L'utilisateur a appuyé sur le bouton d'arrêt
@@ -97,8 +91,8 @@ class ApplicationPilulier:
 
             # Lire le message du uC
             ligneLue = self.serPort.readline()
-            print(ligneLue)
             ligneLue = str(ligneLue.decode('utf-8'))
+            ligneLue = ligneLue.strip()
             print(ligneLue)
             if (ligneLue == "e1"):
                 self.messageAAfficher = "Le pilulier est mal placé."
@@ -116,6 +110,7 @@ class ApplicationPilulier:
                 self.messageAAfficher = "Veuillez ajouter plus de pillules du type " \
                                         + self.prescription[self.prescriptionEnCoursIndex].nom + " dans le système" \
                                         + " et appuyez sur le bouton 'redémarrer'."
+                self.messageNeedsUpdate = True
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonRedemarrer.setEnabled(True)
                 while(self.systemControl is not 2): # L'utilisateur doit appuyer sur le bouton redémarrer
@@ -131,16 +126,24 @@ class ApplicationPilulier:
                 return
             elif (ligneLue == "f"):
                 self.prescriptionEnCoursIndex = self.prescriptionEnCoursIndex + 1
-                self.messageAAfficher = "Verser les pilules de type " \
-                                        + self.prescription[self.prescriptionEnCoursIndex].nom \
-                                        + " dans le système."
-                self.messageNeedsUpdate = True
-                time.sleep(0.3)
+                if self.prescriptionEnCoursIndex < self.prescription.__len__():  # Vérifier si c'était la dernière pill
+                    self.messageAAfficher = "Verser les pilules de type " \
+                                            + self.prescription[self.prescriptionEnCoursIndex].nom \
+                                            + " dans le système."
+                    self.messageNeedsUpdate = True
+                    time.sleep(0.3)
+                    self.serPort.write(bytes([1]))
+                    # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
+                    self.envoyerMatrice(
+                        self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
+                    # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
+                    # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
+
             else:
                 print("Commande non-reconnue")
-                return
+
         self.serPort.write(bytes([4]))
-        self.messageAAfficher("La prescription est terminée.")
+        self.messageAAfficher = "La prescription est terminée."
         self.messageNeedsUpdate = True
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
