@@ -72,7 +72,7 @@ void setup() {
 void loop(){
     init();
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
-    while(!ready){
+    while(ready == false){
         if (digitalRead(capPilPin)){capteurPil = true;}
         else {
           Serial.println("e1");
@@ -109,22 +109,33 @@ void loop(){
                     deplacement[k][j] = Serial.read();
                 }
             }
-            
+            verifArret();
+            verifPil();
+            verifPurge();
             timePilule = milis();
             DClent->run(FORWARD); // Démarrer moteur lent de séparation
 
             //Code de remplissage de prescription
             //Boucle pour une prescription 
             while(PrescDone == false){
+                verifArret();
+                verifPil();
+                verifPurge();
                 while(tailleVect[momentEnCours] == 0){
                     momentEnCours++;
                 }
                 DCrapide->run(FORWARD);
                 while(momentDone == false){
+                    verifArret();
+                    verifPil();
+                    verifPurge();
                     timeActuel = milis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         Serial.println("e3");
                         while(Serial.available()==0){
+                            verifArret();
+                            verifPil();
+                            verifPurge();
                         }
                         commande = Serial.read();
                         if(commande == 3){
@@ -135,6 +146,9 @@ void loop(){
                     distancePil2 = sensor2.readRangeSingleMillimeters();
                     //Vérifie si une pilule passe devant le capteur1
                     if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
+                        verifArret();
+                        verifPil();
+                        verifPurge();
                         compteur1++;
                         timePilule = milis();
                         if(compteur1 == pilParMoment[momentEnCours]){
@@ -144,6 +158,9 @@ void loop(){
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
+                        verifArret();
+                        verifPil();
+                        verifPurge();
                         Wire.beginTransmission(ADRESSE_COMP);
                         Wire.write(deplacement[compteur2][momentEnCours]);
                         Wire.endTransmission();                        
@@ -153,6 +170,9 @@ void loop(){
                             momentDone = true;
                             //Attend que cassette soit en place et qu'elle envoie son status
                             while(Wire.requestFrom(ADRESSE_DIST,1)==0){
+                                verifArret();
+                                verifPil();
+                                verifPurge();  
                             }
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
@@ -162,6 +182,9 @@ void loop(){
                 }
                 //Attend que le tapis de compartimentation soit en place
                 while(Wire.requestFrom(ADRESSE_COMP)==0){
+                    verifArret();
+                    verifPil();
+                    verifPurge();
                 }
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours);
@@ -204,4 +227,38 @@ void purgeComplete() {
   DClent->setSpeed(500); // À déterminer
   DCrapide->run(BACKWARD); // pour combien de temps?
   //fermer les deux moteurs à la fin - à voir selon quand on demande une purge partielle
+}
+
+void arret(){
+    DClent->run(RELEASE);
+    DClent->run(RELEASE);
+    Serial.println("ok");
+    Serial.println("Le systeme est arrete!");
+}
+
+void verifArret(){
+    if(Serial.available()!=0){
+        commande = Serial.read();
+        if(commande == 2){
+        arret();
+        }
+    }
+}
+
+void verifPurge(){
+    if(digitalRead(capPurPin)){
+        arret();
+        Serial.println("e2");
+        Serial.println("Veuillez bien insérer le récipient de purge");
+        ready = false;
+    }
+}
+
+void verifPil(){
+    if(digitalRead(capPilPin)){
+        arret();
+        Serial.println("e1");
+        Serial.println("Veuillez bien insérer le pilulier");
+        ready = false;
+    }
 }
