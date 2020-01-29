@@ -153,7 +153,6 @@ void loop(){
                         timePilule = milis();
                         if(compteur1 == pilParMoment[momentEnCours]){
                             DClent->run(RELEASE);
-                            // Il faut que le bouton 'Redémarrer' recommence le moteur -> TODO
                         }
                     }
                     //Vérifie si une pilule passe devant le capteur2
@@ -167,7 +166,7 @@ void loop(){
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
                             DCrapide->run(RELEASE);
-                            momentDone = true;
+                            momentDone = true; 
                             //Attend que cassette soit en place et qu'elle envoie son status
                             while(Wire.requestFrom(ADRESSE_DIST,1)==0){
                                 verifArret();
@@ -219,14 +218,17 @@ void loop(){
 
 void purgePartielle() {
   DClent->run(RELEASE);
-  DCrapide->run(BACKWARD); // pour combien de temps?
-  //fermer moteur à la fin
+  DCrapide->run(BACKWARD); 
+  delay(5000); // Temps à déterminer
+  DCrapide->run(RELEASE);
 }
 
 void purgeComplete() {
   DClent->setSpeed(500); // À déterminer
-  DCrapide->run(BACKWARD); // pour combien de temps?
-  //fermer les deux moteurs à la fin - à voir selon quand on demande une purge partielle
+  DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
+  DCrapide->run(BACKWARD); 
+  arret();
+  //fermer les deux moteurs à la fin - à voir selon quand on demande une purge complète
 }
 
 void arret(){
