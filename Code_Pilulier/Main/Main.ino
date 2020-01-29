@@ -79,7 +79,18 @@ void loop(){
         if (capteurPil && capteurPur){ready = true;}
     }
 
-    //CODE DE CALIBRATION : si on veut ajouter une calibration -> TODO
+    //Envoi de la commande de calibration - '20' correpond à la commande de calibration
+    Wire.beginTransmission(ADRESSE_COMP);
+    Wire.write(20);
+    Wire.endTransmission();
+    Wire.beginTransmission(ADRESSE_DIST);
+    Wire.write(20);
+    Wire.endTransmission();
+    while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){
+        verifArret();
+        verifPil();
+        verifPurge();
+    }
 
     if (ready){
         //Tant qu'il n'y a pas de byte à lire au port sériel, le programme reste dans la boucle
