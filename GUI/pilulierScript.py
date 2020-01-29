@@ -6,8 +6,6 @@ import serial
 import time
 import threading
 
-# Création d'une variable globale pour le vecteur de tailles pour le déplacement de compartimentation
-vecteurTailles = np.array([], dtype=np.uint8)
 
 class PilulePrescrite:
     def __init__(self, nom, matriceDistribution):
@@ -43,7 +41,7 @@ class ApplicationPilulier:
         self.systemControl = 0
 
         # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM4', 115200)
+        self.serPort = serial.Serial('COM6', 115200)
         time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
@@ -77,10 +75,7 @@ class ApplicationPilulier:
     def threadCommunication(self):
         # Envoyer le signal de départ
         self.serPort.write(bytes([1]))
-        # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
-        self.envoyerMatrice(self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
-        # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
-        # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
+        self.envoyerVecteursAuUC(self.prescriptionEnCoursIndex)
 
         while(self.prescriptionEnCoursIndex < self.prescription.__len__()):
             # Attendre de recevoir une réponse du microcontroleur
@@ -134,12 +129,7 @@ class ApplicationPilulier:
                     self.messageNeedsUpdate = True
                     time.sleep(0.3)
                     self.serPort.write(bytes([1]))
-                    # TODO: Envoyer le vecteur de taille et la matrice de déplacement. (Quand ça sera écrit)
-                    self.envoyerMatrice(
-                        self.prescription[self.prescriptionEnCoursIndex].matriceDistribution)  # temporaire
-                    # vecteurTaille, matriceDeDeplacement = self.genererMatriceDeDistribution
-                    # self.envoyerMatriceDeDeplacement(vecteurTaille, matriceDeDeplacement)
-
+                    self.envoyerVecteursAuUC(self.prescriptionEnCoursIndex)
             else:
                 print("Commande non-reconnue")
 
@@ -149,6 +139,30 @@ class ApplicationPilulier:
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
         return
+
+    def envoyerVecteursAuUC(self, prescriptionEnCoursIndex):
+        # Initialiser les vecteurs à envoyer
+        vecteurTailles = np.array([], dtype=np.uint8)
+        vecteursDistributionListe = []
+
+        matricePrescriptionEnCours = self.prescription[prescriptionEnCoursIndex].matriceDistribution
+
+        for i in range(4):
+            lignePrescription = matricePrescriptionEnCours[:, i]
+            vecteurDistribution = self.genererVecteurDeDistribution(lignePrescription)
+            vecteursDistributionListe.append(vecteurDistribution)
+            vecteurTailles = np.append(vecteurTailles, vecteurDistribution.size)
+
+        # Envoyer le vecteur de tailles
+        vecteurTailles = vecteurTailles.astype(dtype=np.uint8)
+        for i in range(vecteurTailles.size):
+            self.serPort.write(bytes([vecteurTailles[i]]))
+
+        # Envoyer les vecteurs de distribution
+        for i in range(vecteursDistributionListe.__len__()):
+            vecteurAEnvoyer = vecteursDistributionListe[i]
+            for j in range(vecteurAEnvoyer.size):
+                self.serPort.write(bytes([vecteurAEnvoyer[j]]))
 
     def envoyerMatrice(self, matricePrescription):
         for i in range(7):
@@ -193,11 +207,8 @@ class ApplicationPilulier:
         :rtype matriceDeDeplacement: NumPy array de taille 21x4
         """
 
-        # TODO: Creer le vecteur de distribution
+        # Creer le vecteur de distribution
         vecteurDeDistribution = np.array([], dtype=np.uint8)
-
-        # Utilisation d'une variable globale pour construire vecteur de tailles
-        global vecteurTailles
 
         # Initialiser le compteur d'incréments
         compteur = 0
@@ -214,9 +225,7 @@ class ApplicationPilulier:
         if vecteurDeDistribution.shape[0] != 0:
             vecteurDeDistribution = np.append(vecteurDeDistribution, 8)
 
-        vecteurTailles = np.append(vecteurTailles, vecteurDeDistribution.shape[0])
-
-        return vecteurDeDistribution, vecteurTailles
+        return vecteurDeDistribution
 
     def afficherPrescription(self):
         print("Voici la prescription sélectionnée :")
