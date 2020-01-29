@@ -1,17 +1,12 @@
-/*
- Name:		Main.ino
- Created:	21/01/2020
- Author:	Beiko
-*/
-
 #include <Servo.h>
-#include <MultiStepper.h>
-#include <AccelStepper.h>
 #include <Wire.h>
 #include <VL53L0X.h>
-#include <AFMotor.h>
+#include <Adafruit_MotorShield.h>
 
 VL53L0X sensor1, sensor2; 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Adafruit_DCMotor *DClent;
+Adafruit_DCMotor *DCrapide;
 bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone;
 int capPilPin = 1; //à modifier
 int capPurPin = 2; //à modifier
@@ -32,13 +27,8 @@ const int TEMPS_MAX = 10;
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 
-// Connecter un DC motor au port M1 et l'autre au port M3
-//Ici il faut définir les trucs
-Adafruit_DCMotor* DClent = AFMS.getMotor(1);
-Adafruit_DCMotor* DCrapide = AFMS.getMotor(3);
-
 //Initialisation des variables
-void init(){
+void initVar(){
     compteur1 = 0;
     compteur2 = 0;
     compteurTot = 0;
@@ -60,17 +50,20 @@ void setup() {
     //mesure valeur référence des capteurs
     //associer les sensors aux capteurs
     enMarche = false;
+    initVar();
 
+    //Connecter un DC motor au port M1 et l'autre au port M3
+    DClent = AFMS.getMotor(1);
+    DCrapide = AFMS.getMotor(3);
     // DC motor tapis lent
     DClent->setSpeed(200); // À déterminer
-
     // DC motor tapis rapide
     DCrapide->setSpeed(300); // À déterminer
-    init();
 }
 
 void loop(){
-    init();
+    //Réinitialise les valeurs des variables
+    initVar();
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
     while(ready == false){
         if (digitalRead(capPilPin)){capteurPil = true;}
@@ -112,7 +105,7 @@ void loop(){
             verifArret();
             verifPil();
             verifPurge();
-            timePilule = milis();
+            timePilule = millis();
             DClent->run(FORWARD); // Démarrer moteur lent de séparation
 
             //Code de remplissage de prescription
@@ -129,7 +122,7 @@ void loop(){
                     verifArret();
                     verifPil();
                     verifPurge();
-                    timeActuel = milis();
+                    timeActuel = millis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         Serial.println("e3");
                         while(Serial.available()==0){
@@ -139,7 +132,7 @@ void loop(){
                         }
                         commande = Serial.read();
                         if(commande == 3){
-                            timePilule = milis();
+                            timePilule = millis();
                         } //else envoyer message à l'interface pour commande erronnée?
                     }
                     distancePil1 = sensor1.readRangeSingleMillimeters();
@@ -150,7 +143,7 @@ void loop(){
                         verifPil();
                         verifPurge();
                         compteur1++;
-                        timePilule = milis();
+                        timePilule = millis();
                         if(compteur1 == pilParMoment[momentEnCours]){
                             DClent->run(RELEASE);
                         }
@@ -180,7 +173,7 @@ void loop(){
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
-                while(Wire.requestFrom(ADRESSE_COMP)==0){
+                while(Wire.requestFrom(ADRESSE_COMP,1)==0){
                     verifArret();
                     verifPil();
                     verifPurge();
