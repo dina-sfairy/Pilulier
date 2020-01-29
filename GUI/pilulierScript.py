@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from concept_gui2 import Ui_MainWindow
 import numpy as np
-import serial
+import serial # de la librairie pySerial (et non serial)
 import time
 import threading
 
