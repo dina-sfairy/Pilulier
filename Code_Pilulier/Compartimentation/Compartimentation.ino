@@ -33,8 +33,8 @@ int etat; // Variable déterminant l'état de complétion d'une prescription par le
 
 void setup() {
 	// Define the LED pin as Output
-	ASstepper2.setMaxSpeed(4000);
-	ASstepper2.setAcceleration(8000);
+	ASstepper2.setMaxSpeed(200); //
+	ASstepper2.setAcceleration(400);
 	// Start the I2C Bus as Slave on address 10
 	Wire.begin(11);
 	// Attach a function to trigger when something is received.
@@ -61,35 +61,35 @@ void receiveEvent(int bytes) {
 	switch (jour)
 	{
 	case 0:
-		pos = (int) (jour*400/PI);
+		pos = (int) (jour*190/PI); // 190/PI steps pour déplacer latéralement de 45mm lorsque MS! et MS2 sont au ground
 		calibration = true;
 		break;
 	case 1:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 2:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 3:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 4:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 5:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 6:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 7:
-		pos = (int)(jour * 400 / PI);
+		pos = (int)(jour * 190 / PI);
 		posTetePrescription += jour;
 		break;
 	case 8 :

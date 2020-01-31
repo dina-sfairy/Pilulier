@@ -2,7 +2,7 @@
 #include <TimedAction.h>
 #include <Wire.h>
 
-int nano_comp = 1;
+int nano_comp = 7;
 int nano_dist = 2;
 int test[9] = { 0,1,2,3,8,7,8, 1,8 };
 int pos;
@@ -10,7 +10,7 @@ bool ready;
 int presentTime = 0;
 int chiffre;
 // Test de vérification
-TimedAction timedActionComp = TimedAction(3500, commanderCompartimentation);
+TimedAction timedActionComp = TimedAction(5000, commanderCompartimentation);
 TimedAction timedActionDist = TimedAction(8000, commanderDistribution);
 
 int vect[10];
@@ -31,8 +31,8 @@ void setup() {
 
 void loop() {
 	
-	//timedActionComp.check();
-	timedActionDist.check();
+	timedActionComp.check();
+	//timedActionDist.check();
 
 	
 
@@ -59,16 +59,21 @@ void loop() {
 
 void commanderCompartimentation() {
 	
-	nano_comp = test[pos];
-	pos++;
-	Serial.println(nano_comp);
+	//nano_comp = test[pos];
+	//pos++;
+	//Serial.println(nano_comp);
+	//Wire.beginTransmission(11); // transmit to device #11
+	//Wire.write(nano_comp);              // sends x 
+	//Wire.endTransmission();    // stop transmitting
+	////nano_comp++;
+	//if (pos > 8) {
+	//	pos = 0;
+	//}
+
 	Wire.beginTransmission(11); // transmit to device #11
 	Wire.write(nano_comp);              // sends x 
 	Wire.endTransmission();    // stop transmitting
-	//nano_comp++;
-	if (pos > 8) {
-		pos = 0;
-	}
+
 }
 
 void commanderDistribution() {
