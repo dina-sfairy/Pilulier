@@ -145,7 +145,7 @@ void loop(){
                 //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 while(tailleVect[momentEnCours] == 0){
-                    Serial.print("Moment ne contient pas de pilules"); 
+                    Serial.println("Moment ne contient pas de pilules"); 
                     momentEnCours++;
                 }
                 Serial.print("Debut moment de journée"); Serial.println(momentEnCours); //print pour les tests
