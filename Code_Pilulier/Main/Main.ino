@@ -35,9 +35,9 @@ void initVar(){
     timeActuel = 0;
     timePilule = 0;
     momentEnCours = 0;
-    capteurPil = false;
-    capteurPur = false;
-    ready = false;
+    capteurPil = true; //à modifier quand on aura les vrais capteurs
+    capteurPur = true; //à modifier quand on aura les vrais capteurs
+    ready = true; //Mettre true pour les tests sans capteur de purge/pilulier
     enMarche = false;
     momentDone = false;
     PrescDone = false;
@@ -47,6 +47,8 @@ void initVar(){
 }
 
 void setup() {
+    Serial.begin();
+    Serial2.begin();
     //mesure valeur référence des capteurs
     //associer les sensors aux capteurs
     enMarche = false;
@@ -88,9 +90,10 @@ void loop(){
     Wire.endTransmission();
     while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){
         verifArret();
-        verifPil();
-        verifPurge();
+        //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+        //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
+    Serial2.println("Les slaves sont ready");   //print pour les tests
 
     if (ready){
         //Tant qu'il n'y a pas de byte à lire au port sériel, le programme reste dans la boucle
@@ -100,6 +103,7 @@ void loop(){
         enMarche = true;
         //la commande 1 correspond à l'appui du bouton démarrer
         if (commande == 1){
+            Serial2.println("Commande de départ recue"); //print pour les tests
             delay(10);
             //Acquisition du vecteur de taille des vecteurs déplacement/moment
             for(int i = 0; i<4; i++){
@@ -113,9 +117,12 @@ void loop(){
                     deplacement[k][j] = Serial.read();
                 }
             }
+            Serial2.println("Prescription recue et bien lue");  //print pour les tests
+            Serial2.println(tailleVect);                        //print pour les tests
+            Serial2.println(deplacement);                       //print pour les tests
             verifArret();
-            verifPil();
-            verifPurge();
+            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
             timePilule = millis();
             DClent->run(FORWARD); // Démarrer moteur lent de séparation
 
@@ -123,23 +130,25 @@ void loop(){
             //Boucle pour une prescription 
             while(PrescDone == false){
                 verifArret();
-                verifPil();
-                verifPurge();
+                //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 while(tailleVect[momentEnCours] == 0){
+                    Serial2.print("Moment ne contient pas de pilules"); 
                     momentEnCours++;
                 }
+                Serial2.print("Debut moment de journée"); Serial2.println(momentEnCours); //print pour les tests
                 DCrapide->run(FORWARD);
                 while(momentDone == false){
                     verifArret();
-                    verifPil();
-                    verifPurge();
+                    //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                    //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     timeActuel = millis();
                     if(timeActuel-timePilule >= TEMPS_MAX*1000){
                         Serial.println("e3");
                         while(Serial.available()==0){
                             verifArret();
-                            verifPil();
-                            verifPurge();
+                            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                         }
                         commande = Serial.read();
                         if(commande == 3){
@@ -150,33 +159,38 @@ void loop(){
                     distancePil2 = sensor2.readRangeSingleMillimeters();
                     //Vérifie si une pilule passe devant le capteur1
                     if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
+                        Serial2.println("pilule captee par capteur 1"); //print pour les tests
                         verifArret();
-                        verifPil();
-                        verifPurge();
+                        //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                        //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                         compteur1++;
                         timePilule = millis();
                         if(compteur1 == pilParMoment[momentEnCours]){
+                            Serial2.println("compteur 1 a atteint nb de pillules pour le moment"); //print pour les tests
                             DClent->run(RELEASE);
                         }
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
+                        Serial2.println("pilule captee par capteur 2"); //print pour les tests
                         verifArret();
-                        verifPil();
-                        verifPurge();
+                        //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                        //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                         Wire.beginTransmission(ADRESSE_COMP);
                         Wire.write(deplacement[compteur2][momentEnCours]);
                         Wire.endTransmission();                        
                         compteur2++;
                         if(deplacement[momentEnCours][compteur2]==8){
+                            Serial2.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
                             DCrapide->run(RELEASE);
                             momentDone = true; 
                             //Attend que cassette soit en place et qu'elle envoie son status
                             while(Wire.requestFrom(ADRESSE_DIST,1)==0){
                                 verifArret();
-                                verifPil();
-                                verifPurge();  
+                                //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                                //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
                             }
+                            Serial2.println("cassette prete et en place"); //print pour les tests
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
                             Wire.endTransmission();
@@ -186,9 +200,10 @@ void loop(){
                 //Attend que le tapis de compartimentation soit en place
                 while(Wire.requestFrom(ADRESSE_COMP,1)==0){
                     verifArret();
-                    verifPil();
-                    verifPurge();
+                    //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                    //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 }
+                Serial2.println("tapis compartimentation est pret et en place"); //print pour les tests
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours);
                 Wire.endTransmission();
@@ -210,6 +225,7 @@ void loop(){
                 momentDone = false;
                 momentEnCours++;
                 if(momentEnCours > 3){
+                    Serial2.println("prescription terminee"); //print pour les tests
                     PrescDone = true;
                     purgeComplete();
                     Serial.println("f");
