@@ -12,7 +12,7 @@ Adafruit_DCMotor *DCrapide;
 bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone;
 int tailleVect[4]; 
 int pilParMoment[4];
-int compteur1, compteur2, compteurTot, distancePil1, distancePil2;
+int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
 int momentEnCours;
 byte deplacement[21][4];
 byte commande;
@@ -49,12 +49,15 @@ void initVar(){
 }
 
 void setup() {
+    capPilPin = 1;  //à modifier
+    capPurPin = 2;  //à modfier
+    
     //Association des adresses des capteurs
     pinMode(SENSOR1_XSHUNT_PIN, OUTPUT);
     pinMode(SENSOR2_XSHUNT_PIN, OUTPUT);
     digitalWrite(SENSOR1_XSHUNT_PIN, LOW);
     digitalWrite(SENSOR2_XSHUNT_PIN, LOW);
-    Serial.begin();
+    Serial.begin(115200);
     Wire.begin();
     //Set les adresses des capteurs
     setSensorsAddress();
@@ -126,8 +129,7 @@ void loop(){
                 }
             }
             Serial.println("Prescription recue et bien lue");  //print pour les tests
-            Serial.println(tailleVect);                        //print pour les tests
-            Serial.println(deplacement);                       //print pour les tests
+            Serial.print(tailleVect[0]);Serial.print(tailleVect[1]);Serial.print(tailleVect[2]);Serial.println(tailleVect[3]);  //print pour les tests                     //print pour les tests
             verifArret();
             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
