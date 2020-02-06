@@ -99,11 +99,13 @@ void loop(){
     Wire.beginTransmission(ADRESSE_DIST);
     Wire.write(20);
     Wire.endTransmission();
+    //UNCOMMENT Pour utiliser code de calibration
+    /*
     while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){
-        verifArret();
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
+    */
     Serial.println("Les slaves sont calibres et ready");   //print pour les tests
 
     if (ready){
