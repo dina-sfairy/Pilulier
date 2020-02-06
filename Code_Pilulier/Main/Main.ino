@@ -3,13 +3,12 @@
 #include <VL53L0X.h>
 #include <Adafruit_MotorShield.h>
 
+//Déclaration des variables et constantes
 VL53L0X sensor1, sensor2; 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
 bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone;
-int capPilPin = 1; //à modifier
-int capPurPin = 2; //à modifier
 int tailleVect[4]; 
 int pilParMoment[4];
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2;
@@ -19,13 +18,15 @@ byte commande;
 byte matricePrescription[7][4];
 long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
-const int DIST_REF1 = 20;
-const int DIST_REF2 = 20;
-const int DIST_SEUIL1 = 10;
-const int DIST_SEUIL2 = 10;
+const int DIST_SEUIL1 = 70;
+const int DIST_SEUIL2 = 40;
 const int TEMPS_MAX = 10;
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
+const int SENSOR1_XSHUNT_PIN = 30;
+const int SENSOR2_XSHUNT_PIN = 32;
+const uint8_t SENSOR1_ADDRESS = 5;
+const uint8_t SENSOR2_ADDRESS = 6;
 
 //Initialisation des variables
 void initVar(){
@@ -47,10 +48,17 @@ void initVar(){
 }
 
 void setup() {
+    //Association des adresses des capteurs
+    pinMode(SENSOR1_XSHUNT_PIN, OUTPUT);
+    pinMode(SENSOR2_XSHUNT_PIN, OUTPUT);
+    digitalWrite(SENSOR1_XSHUNT_PIN, LOW);
+    digitalWrite(SENSOR2_XSHUNT_PIN, LOW);
     Serial.begin();
     Serial2.begin();
+    Wire.begin();
+    //Set les adresses des capteurs
+    setSensorsAddress();
     //mesure valeur référence des capteurs
-    //associer les sensors aux capteurs
     enMarche = false;
     initVar();
 
@@ -93,7 +101,7 @@ void loop(){
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
-    Serial2.println("Les slaves sont ready");   //print pour les tests
+    Serial2.println("Les slaves sont calibres et ready");   //print pour les tests
 
     if (ready){
         //Tant qu'il n'y a pas de byte à lire au port sériel, le programme reste dans la boucle
@@ -158,7 +166,7 @@ void loop(){
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
                     //Vérifie si une pilule passe devant le capteur1
-                    if(DIST_REF1 - distancePil1 > DIST_SEUIL1){
+                    if(distancePil1 < DIST_SEUIL1){
                         Serial2.println("pilule captee par capteur 1"); //print pour les tests
                         verifArret();
                         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -171,7 +179,7 @@ void loop(){
                         }
                     }
                     //Vérifie si une pilule passe devant le capteur2
-                    if(DIST_REF2 - distancePil2 > DIST_SEUIL2){
+                    if(distancePil2 < DIST_SEUIL2){
                         Serial2.println("pilule captee par capteur 2"); //print pour les tests
                         verifArret();
                         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -283,4 +291,21 @@ void verifPil(){
         Serial.println("Veuillez bien insérer le pilulier");
         ready = false;
     }
+}
+
+void setSensorsAddress() {
+  // Changer l'addresse du sensor1
+  pinMode(SENSOR1_XSHUNT_PIN, INPUT);
+  delay(100);
+  sensor1.init(true);
+  delay(100);
+  sensor1.setAddress(SENSOR1_ADDRESS);
+  delay(100);
+  // Changer l'addresse du sensor2
+  pinMode(SENSOR2_XSHUNT_PIN, INPUT);
+  delay(100);
+  sensor2.init(true);
+  delay(100);
+  sensor2.setAddress(SENSOR2_ADDRESS);
+  delay(100);
 }
