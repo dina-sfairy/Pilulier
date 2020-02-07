@@ -35,10 +35,10 @@ int etat; // Variable déterminant l'état de complétion d'une prescription par le
 
 void setup() {
 	// Define the LED pin as Output
-	ASstepper2.setMaxSpeed(150); // 200 et 400 acc
-	ASstepper2.setAcceleration(200);
+	ASstepper2.setMaxSpeed(200); // 200 et 400 acc
+	ASstepper2.setAcceleration(100);
 	// Start the I2C Bus as Slave on address 10
-	Wire.begin(11);
+	Wire.begin(10);
 	// Attach a function to trigger when something is received.
 	Wire.onReceive(receiveEvent);
 	Wire.onRequest(requestEvent);

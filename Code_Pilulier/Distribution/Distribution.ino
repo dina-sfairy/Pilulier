@@ -12,7 +12,7 @@
 #include <AccelStepper.h>
 #include <Wire.h>
 
-AccelStepper ASstepper2(AccelStepper::DRIVER, 9, 8);
+AccelStepper ASstepper2(AccelStepper::DRIVER, 2, 3);
 void ActiverStepper2() {
 	ASstepper2.run();
 }
@@ -33,8 +33,8 @@ Servo Servo1;
 void setup() {
 	// Define the LED pin as Output
 	pinMode(LED, OUTPUT);
-	ASstepper2.setMaxSpeed(2000);
-	ASstepper2.setAcceleration(500);
+	ASstepper2.setMaxSpeed(600);
+	ASstepper2.setAcceleration(300);
 	ASstepper2.setCurrentPosition(0);
 	// Start the I2C Bus as Slave on address 11
 	Wire.begin(11);
@@ -45,7 +45,7 @@ void setup() {
 	etape = 2;
 	pos = 1;
 	momentJournee = 0;
-	servoPin = 3;
+	servoPin = 12;
 	nbSteps = 0;
 	posAjustement = (int)(100 / PI);
 	compteurAjustement = 0;
@@ -68,19 +68,19 @@ void receiveEvent(int bytes) {
 	switch (momentJournee)
 	{
 	case 1:
-		pos = (int)(20 * 57 / PI); // Les calculs assument 1 tour = 400 steps
+		pos = (int)((2*90/25)*100/ PI); // Les calculs assument 1 tour = 400 steps
 		retour = false;
 		break;
 	case 2:
-		pos = (int)(20 * 57 / PI); // Les calculs assument 1 tour = 400 steps
+		pos = (int)((2*(90 + 55)/25)*100 / PI); // Les calculs assument 1 tour = 400 steps
 		retour = false;
 		break;
 	case 3:
-		pos = (int)(20 * (57 + 63) / PI);
+		pos = (int)((2 * (90 + 55 + 60) / 25) * 100 / PI);
 		retour = false;
 		break;
 	case 4:
-		pos = (int)(20 * (57 * 2 + 63) / PI);
+		pos = (int)((2 * (90 + 55*2 + 60) / 25) * 100 / PI);
 		retour = false;
 		break;
 	default:
@@ -92,7 +92,7 @@ void receiveEvent(int bytes) {
 	Serial.println(pos);
 	if (pos > 0) {
 		ASstepper2.setCurrentPosition(0);
-		ASstepper2.moveTo(pos);
+		ASstepper2.moveTo(-pos);
 	}
 	else {
 		Serial.println("Position 0");
@@ -120,9 +120,9 @@ void loop() {
 		nbSteps = 0;
 	}
 	else if (ASstepper2.distanceToGo() == 0 && etape == 2) {
-		if (digitalRead(6) != 0) {
+		if (digitalRead(11) != 0) {
 			compteurAjustement++;
-			ASstepper2.moveTo(-compteurAjustement*posAjustement);
+			ASstepper2.moveTo(compteurAjustement*posAjustement);
 			nbSteps = 0;
 		}
 		else
