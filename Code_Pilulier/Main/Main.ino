@@ -9,7 +9,7 @@ VL53L0X sensor1, sensor2;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
-bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone;
+bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone, samePil1, samePil2;
 int tailleVect[4]; 
 int pilParMoment[4];
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
@@ -43,6 +43,8 @@ void initVar(){
     enMarche = false;
     momentDone = false;
     PrescDone = false;
+    samePil1 = false;
+    samePil2 = false;
     memset(tailleVect, 0, sizeof(tailleVect));
     memset(pilParMoment, 0, sizeof(pilParMoment));
     memset(deplacement, 0, sizeof(deplacement));
@@ -168,43 +170,53 @@ void loop(){
                     distancePil2 = sensor2.readRangeSingleMillimeters();
                     //Vérifie si une pilule passe devant le capteur1
                     if(distancePil1 < DIST_SEUIL1){
-                        Serial.println("pilule captee par capteur 1"); //print pour les tests
-                        verifCommande();
-                        //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                        //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                        compteur1++;
-                        timePilule = millis();
-                        if(compteur1 == pilParMoment[momentEnCours]){
-                            Serial.println("compteur 1 a atteint nb de pillules pour le moment"); //print pour les tests
-                            DClent->run(RELEASE);
+                        if(samePil1 == false){
+                            samePil1 = true;
+                            Serial.println("pilule captee par capteur 1"); //print pour les tests
+                            verifCommande();
+                            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                            compteur1++;
+                            timePilule = millis();
+                            if(compteur1 == pilParMoment[momentEnCours]){
+                                Serial.println("compteur 1 a atteint nb de pillules pour le moment"); //print pour les tests
+                                DClent->run(RELEASE);
+                            }
                         }
+                    } else if(distancePil1 > DIST_SEUIL1 + 10){
+                        samePil1 = false;
                     }
                     //Vérifie si une pilule passe devant le capteur2
                     if(distancePil2 < DIST_SEUIL2){
-                        Serial.println("pilule captee par capteur 2"); //print pour les tests
-                        verifCommande();
-                        //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                        //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                        Wire.beginTransmission(ADRESSE_COMP);
-                        Wire.write(deplacement[compteur2][momentEnCours]);
-                        Wire.endTransmission();                        
-                        compteur2++;
-                        if(deplacement[momentEnCours][compteur2]==8){
-                            Serial.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
-                            DCrapide->run(RELEASE);
-                            momentDone = true; 
-                            //Attend que cassette soit en place et qu'elle envoie son status
-                    //        while(Wire.requestFrom(ADRESSE_DIST,1)==0){
-                    //            verifCommande();
-                    //            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                    //            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
-                    //        }
-                            Serial.println("cassette prete et en place"); //print pour les tests
+                        if(samePil2 == false){
+                            samePil2 = true;
+                            Serial.println("pilule captee par capteur 2"); //print pour les tests
+                            verifCommande();
+                            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
-                            Wire.endTransmission();
-                            Serial.println("commande envoyer au slave compartimentation"); //print pour les tests
+                            Wire.endTransmission();                        
+                            compteur2++;
+                            if(deplacement[momentEnCours][compteur2]==8){
+                                Serial.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
+                                DCrapide->run(RELEASE);
+                                momentDone = true; 
+                                //Attend que cassette soit en place et qu'elle envoie son status
+                    //            while(Wire.requestFrom(ADRESSE_DIST,1)==0){
+                    //                verifCommande();
+                    //                //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                    //                //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
+                    //            }
+                                Serial.println("cassette prete et en place"); //print pour les tests
+                                Wire.beginTransmission(ADRESSE_COMP);
+                                Wire.write(deplacement[compteur2][momentEnCours]);
+                                Wire.endTransmission();
+                                Serial.println("commande envoyer au slave compartimentation"); //print pour les tests
+                            }
                         } 
+                    } else if(distancePil2 > DIST_SEUIL2 + 10){
+                        samePil2 = false;
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
