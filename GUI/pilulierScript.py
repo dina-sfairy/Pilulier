@@ -2,9 +2,10 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from concept_gui2 import Ui_MainWindow
 import numpy as np
-import serial # de la librairie pySerial (et non serial)
+import serial  # de la librairie pySerial (et non serial)
 import time
 import threading
+from pygame import mixer  # Pour jouer des sons
 
 
 class PilulePrescrite:
@@ -93,12 +94,16 @@ class ApplicationPilulier:
             if (ligneLue == "e1"):
                 self.messageAAfficher = "Le pilulier est mal placé."
                 self.messageNeedsUpdate = True
+                mixer.music.load('messagePilulier.mp3')
+                mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonDemarer.setEnabled(True)
                 return
             elif (ligneLue == "e2"):
                 self.messageAAfficher = "Le contenant de purge est mal placé."
                 self.messageNeedsUpdate = True
+                mixer.music.load('messagePurge.mp3')
+                mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonDemarer.setEnabled(True)
                 return
@@ -107,6 +112,8 @@ class ApplicationPilulier:
                                         + self.prescription[self.prescriptionEnCoursIndex].nom + " dans le système" \
                                         + " et appuyez sur le bouton 'redémarrer'."
                 self.messageNeedsUpdate = True
+                mixer.music.load('messageManquePilules.mp3')
+                mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonRedemarrer.setEnabled(True)
                 while(self.systemControl is not 2): # L'utilisateur doit appuyer sur le bouton redémarrer
@@ -127,6 +134,8 @@ class ApplicationPilulier:
                                             + self.prescription[self.prescriptionEnCoursIndex].nom \
                                             + " dans le système."
                     self.messageNeedsUpdate = True
+                    mixer.music.load('messageTypeComplet.mp3')
+                    mixer.music.play()
                     time.sleep(0.3)
                     self.serPort.write(bytes([1]))
                     self.envoyerVecteursAuUC(self.prescriptionEnCoursIndex)
@@ -136,6 +145,8 @@ class ApplicationPilulier:
         self.serPort.write(bytes([4]))
         self.messageAAfficher = "La prescription est terminée."
         self.messageNeedsUpdate = True
+        mixer.music.load('messagePrescriptionTerminee.mp3')
+        mixer.music.play()
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
         return
@@ -194,17 +205,12 @@ class ApplicationPilulier:
 
 
     def genererVecteurDeDistribution(self, ligneDePrescription):
-
         """
         Cette méthode génère un vecteur de distribution
-        :param matriceDeDistribution: matrice represantant, pour une pilule donnée, la quantité à placer dans le pilulier
-         à chaque jour de la semaine selon le moment de la journée
-        :type matriceDeDistribution: NumPy array de taille 7x4 (7 lignes, 4 colonnes)
-        :return vecteurTaille: Vecteur contenant le nombre d'éléments à envoyer pour chaque moment de la journée
-        :rtype NumPy array 1D avec une taille de 4
-        :return matriceDeDeplacement: Matrice décrivant combien de cases il faut déplacer le tapis de compartimentation à chaque étape de
-        celui-ci pour la pilule donnée.
-        :rtype matriceDeDeplacement: NumPy array de taille 21x4
+        :param ligneDePrescription: Vecteur représentant la prescription de la pilule pour un moment de la journée 
+        :type ligneDePrescription: NumPy array 1D de taille 7. 
+        :return Le vecteur de distribution décrivant les déplacements que le tapis de compartimentation doit faire.
+        :rtype NumPy array 1D avec une taille de entre 0 et 21
         """
 
         # Creer le vecteur de distribution
@@ -235,6 +241,7 @@ class ApplicationPilulier:
 
 
 if __name__ == "__main__":
+    mixer.init()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     appliPilulier = ApplicationPilulier(MainWindow)
