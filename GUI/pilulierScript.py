@@ -42,7 +42,7 @@ class ApplicationPilulier:
         self.systemControl = 0
 
         # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM16', 115200)
+        self.serPort = serial.Serial('COM15', 115200)
         time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
@@ -60,9 +60,9 @@ class ApplicationPilulier:
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
                                          + " dans le système.")
 
-        # self.threadCommunication()
-        t = threading.Thread(target=self.threadCommunication)
-        t.start()
+        self.threadCommunication()
+        # t = threading.Thread(target=self.threadCommunication)
+        # t.start()
 
     def onRedemarrerClicked(self):
         self.systemControl = 2

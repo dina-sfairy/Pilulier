@@ -21,7 +21,7 @@ long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
 const int DIST_SEUIL1 = 70;
 const int DIST_SEUIL2 = 40;
-const int TEMPS_MAX = 10;
+const long TEMPS_MAX = 200;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 const int SENSOR1_XSHUNT_PIN = 12;
@@ -31,6 +31,7 @@ const uint8_t SENSOR2_ADDRESS = 6;
 
 //Initialisation des variables
 void initVar(){
+    commande = 0;
     compteur1 = 0;
     compteur2 = 0;
     compteurTot = 0;
@@ -150,6 +151,13 @@ void loop(){
                     Serial.println("Moment ne contient pas de pilules"); 
                     momentEnCours++;
                 }
+                if(momentEnCours > 3){
+                    Serial.println("prescription terminee"); //print pour les tests
+                    PrescDone = true;
+                    purgeComplete();
+                    Serial.println("f");
+                    break;
+                }
                 DCrapide->run(FORWARD);
                 Serial.print("Debut moment de journée :"); Serial.println(momentEnCours); //print pour les tests
                 timePilule = millis();
@@ -158,7 +166,9 @@ void loop(){
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     timeActuel = millis();
-                    if(timeActuel-timePilule >= TEMPS_MAX*1000){
+                    if((timeActuel-timePilule) > (TEMPS_MAX*1000)){
+                        Serial.println(timeActuel);
+                        Serial.println(timePilule);
                         Serial.println("e3");
                         while(Serial.available()==0){
                             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -182,11 +192,12 @@ void loop(){
                                 Serial.println("compteur 1 a atteint nb de pillules pour le moment"); //print pour les tests
                                 DClent->run(RELEASE);
                             }
+                        } else {
+                            Serial.println("Meme pilule captee par capteur 1"); //Print pour les tests
                         }
-                    } else if(distancePil1 > DIST_SEUIL1 + 10){
+                    }
+                    if(distancePil1 > DIST_SEUIL1 + 10){
                         samePil1 = false;
-                    } else if(samePil1){    //print pour tests
-                        Serial.println("meme pilule captee 1");
                     }
                     
                     //Vérifie si une pilule passe devant le capteur2
@@ -217,11 +228,12 @@ void loop(){
                                 Wire.endTransmission();
                                 Serial.println("commande envoyer au slave compartimentation"); //print pour les tests
                             }
-                        } 
-                    } else if(distancePil2 > DIST_SEUIL2 + 10){
+                        } else {
+                            Serial.println("Meme pilule captee par capteur 2"); //Print pour les tests
+                        }
+                    }
+                    if(distancePil2 > DIST_SEUIL2 + 10){
                         samePil2 = false;
-                    } else if(samePil2){    //print pour tests
-                        Serial.println("meme pilule captee par 2");
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
@@ -255,13 +267,7 @@ void loop(){
                 }
                 momentDone = false;
                 momentEnCours++;
-                if(momentEnCours > 3){
-                    Serial.println("prescription terminee"); //print pour les tests
-                    PrescDone = true;
-                    purgeComplete();
-                    Serial.println("f");
-                    break;
-                }
+                
             }
         }
     }
@@ -286,7 +292,6 @@ void arret(){
     DClent->run(RELEASE);
     DClent->run(RELEASE);
     Serial.println("ok");
-    Serial.println("Le systeme est arrete!");
 }
 
 void verifCommande(){
