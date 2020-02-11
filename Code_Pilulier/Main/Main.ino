@@ -155,6 +155,7 @@ void loop(){
                     Serial.println("prescription terminee"); //print pour les tests
                     PrescDone = true;
                     purgeComplete();
+                    enMarche = false;
                     Serial.println("f");
                     break;
                 }
