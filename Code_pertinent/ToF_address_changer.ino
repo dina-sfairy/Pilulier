@@ -3,8 +3,8 @@
 
 VL53L0X sensor1;
 VL53L0X sensor2;
-const int SENSOR1_XSHUNT_PIN = 30;
-const int SENSOR2_XSHUNT_PIN = 32;
+const int SENSOR1_XSHUNT_PIN = 12;
+const int SENSOR2_XSHUNT_PIN = 13;
 const uint8_t SENSOR1_ADDRESS = 5;
 const uint8_t SENSOR2_ADDRESS = 6;
 
@@ -40,7 +40,8 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(sensor1.readRangeSingleMillimeters());
+  Serial.print(sensor1.readRangeSingleMillimeters());
+  Serial.print(",");
   Serial.println(sensor2.readRangeSingleMillimeters());
 
 }
