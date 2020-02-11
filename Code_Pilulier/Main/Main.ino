@@ -24,8 +24,8 @@ const int DIST_SEUIL2 = 40;
 const int TEMPS_MAX = 10;
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
-const int SENSOR1_XSHUNT_PIN = 30;
-const int SENSOR2_XSHUNT_PIN = 32;
+const int SENSOR1_XSHUNT_PIN = 12;
+const int SENSOR2_XSHUNT_PIN = 13;
 const uint8_t SENSOR1_ADDRESS = 5;
 const uint8_t SENSOR2_ADDRESS = 6;
 
@@ -185,7 +185,10 @@ void loop(){
                         }
                     } else if(distancePil1 > DIST_SEUIL1 + 10){
                         samePil1 = false;
+                    } else if(samePil1){    //print pour tests
+                        Serial.println("meme pilule captee 1");
                     }
+                    
                     //Vérifie si une pilule passe devant le capteur2
                     if(distancePil2 < DIST_SEUIL2){
                         if(samePil2 == false){
@@ -217,6 +220,8 @@ void loop(){
                         } 
                     } else if(distancePil2 > DIST_SEUIL2 + 10){
                         samePil2 = false;
+                    } else if(samePil2){    //print pour tests
+                        Serial.println("meme pilule captee par 2");
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
