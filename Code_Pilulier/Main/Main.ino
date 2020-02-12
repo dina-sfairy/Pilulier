@@ -11,7 +11,7 @@ Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
 bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2;
 int tailleVect[4]; 
-int pilParMoment[4];
+int pilParMoment[4]; 
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
 int momentEnCours;
 byte deplacement[21][4];
