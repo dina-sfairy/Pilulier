@@ -60,9 +60,9 @@ class ApplicationPilulier:
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
                                          + " dans le système.")
 
-        self.threadCommunication()
-        # t = threading.Thread(target=self.threadCommunication)
-        # t.start()
+        # self.threadCommunication()
+        t = threading.Thread(target=self.threadCommunication)
+        t.start()
 
     def onRedemarrerClicked(self):
         self.systemControl = 2
@@ -130,12 +130,19 @@ class ApplicationPilulier:
             elif (ligneLue == "f"):
                 self.prescriptionEnCoursIndex = self.prescriptionEnCoursIndex + 1
                 if self.prescriptionEnCoursIndex < self.prescription.__len__():  # Vérifier si c'était la dernière pill
+
+                    # Attendre que l'usager appuie sur redémarer
+                    self.ui.boutonArreter.setEnabled(False)
+                    self.ui.boutonDemarer.setEnabled(True)
                     self.messageAAfficher = "Verser les pilules de type " \
                                             + self.prescription[self.prescriptionEnCoursIndex].nom \
-                                            + " dans le système."
+                                            + " dans le système et appuyez sur redémarrer."
                     self.messageNeedsUpdate = True
                     mixer.music.load('messageTypeComplet.mp3')
                     mixer.music.play()
+                    while (self.systemControl is not 2):  # L'utilisateur doit appuyer sur le bouton redémarrer
+                        time.sleep(0.2)
+                    self.systemControl = 0
                     time.sleep(0.3)
                     self.serPort.write(bytes([1]))
                     self.envoyerVecteursAuUC(self.prescriptionEnCoursIndex)
