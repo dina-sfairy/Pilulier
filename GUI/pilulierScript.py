@@ -133,7 +133,7 @@ class ApplicationPilulier:
 
                     # Attendre que l'usager appuie sur redémarer
                     self.ui.boutonArreter.setEnabled(False)
-                    self.ui.boutonDemarer.setEnabled(True)
+                    self.ui.boutonRedemarrer.setEnabled(True)
                     self.messageAAfficher = "Verser les pilules de type " \
                                             + self.prescription[self.prescriptionEnCoursIndex].nom \
                                             + " dans le système et appuyez sur redémarrer."
