@@ -9,7 +9,7 @@ VL53L0X sensor1, sensor2;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
-bool capteurPil, capteurPur, ready, enMarche, momentDone, PrescDone, samePil1, samePil2;
+bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2;
 int tailleVect[4]; 
 int pilParMoment[4];
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
@@ -31,7 +31,7 @@ const uint8_t SENSOR2_ADDRESS = 6;
 
 //Initialisation des variables
 void initVar(){
-    commande = 0;
+    //commande = 0; à voir pour les tests
     compteur1 = 0;
     compteur2 = 0;
     compteurTot = 0;
@@ -41,7 +41,6 @@ void initVar(){
     capteurPil = true; //à modifier quand on aura les vrais capteurs
     capteurPur = true; //à modifier quand on aura les vrais capteurs
     ready = true; //Mettre true pour les tests sans capteur de purge/pilulier
-    enMarche = false;
     momentDone = false;
     PrescDone = false;
     samePil1 = false;
@@ -64,16 +63,12 @@ void setup() {
     Wire.begin();
     //Set les adresses des capteurs
     setSensorsAddress();
-    //mesure valeur référence des capteurs
-    enMarche = false;
     initVar();
 
     //Connecter un DC motor au port M1 et l'autre au port M3
     DClent = AFMS.getMotor(1);
     DCrapide = AFMS.getMotor(3);
-    // DC motor tapis lent
     DClent->setSpeed(200); // À déterminer
-    // DC motor tapis rapide
     DCrapide->setSpeed(300); // À déterminer
 }
 
@@ -113,10 +108,9 @@ void loop(){
 
     if (ready){
         //Tant qu'il n'y a pas de byte à lire au port sériel, le programme reste dans la boucle
-        while(Serial.available()==0 && !enMarche){
+        while(Serial.available()==0){
         }
         commande = Serial.read();
-        enMarche = true;
         //la commande 1 correspond à l'appui du bouton démarrer
         if (commande == 1){
             Serial.println("Commande de départ recue"); //print pour les tests
@@ -155,7 +149,6 @@ void loop(){
                     Serial.println("prescription terminee"); //print pour les tests
                     PrescDone = true;
                     purgeComplete();
-                    enMarche = false;
                     Serial.println("f");
                     break;
                 }
