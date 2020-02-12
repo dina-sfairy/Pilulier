@@ -127,8 +127,18 @@ void loop(){
                     deplacement[k][j] = Serial.read();
                 }
             }
+            //PRINT POUR DES TESTS
             Serial.println("Prescription recue et bien lue");  //print pour les tests
-            Serial.print(tailleVect[0]);Serial.print(tailleVect[1]);Serial.print(tailleVect[2]);Serial.println(tailleVect[3]);  //print pour les tests                     //print pour les tests
+            Serial.print(tailleVect[0]);Serial.print(tailleVect[1]);Serial.print(tailleVect[2]);Serial.println(tailleVect[3]);  //print pour les tests   
+            for(int i = 0; i < 4; i++) {
+                for (int j = 0; j < sizeof(tailleVect)/sizeof(tailleVect[i]); j++)
+                {
+                    Serial.print(deplacement[j][i]);
+                }
+                Serial.println(" ");
+            }
+                             
+            Serial.print(pilParMoment[0]);Serial.print(pilParMoment[1]);Serial.print(pilParMoment[2]);Serial.println(pilParMoment[3]);  //print pour les tests                    
             verifCommande();
             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -206,7 +216,7 @@ void loop(){
                             Wire.write(deplacement[compteur2][momentEnCours]);
                             Wire.endTransmission();                        
                             compteur2++;
-                            if(deplacement[momentEnCours][compteur2]==8){
+                            if(deplacement[compteur2][momentEnCours]==8){
                                 Serial.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
                                 DCrapide->run(RELEASE);
                                 momentDone = true; 
@@ -275,11 +285,12 @@ void purgePartielle() {
 }
 
 void purgeComplete() {
-  DClent->setSpeed(500); // À déterminer
-  DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
-  DCrapide->run(BACKWARD); 
-  arret();
-  //fermer les deux moteurs à la fin - à voir selon quand on demande une purge complète
+    DClent->setSpeed(500); // À déterminer
+    DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
+    DCrapide->run(BACKWARD); 
+    //delay à déterminer
+    DClent->run(RELEASE);
+    DClent->run(RELEASE);
 }
 
 void arret(){
