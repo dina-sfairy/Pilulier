@@ -12,7 +12,7 @@
 #include <AccelStepper.h>
 #include <Wire.h>
 
-AccelStepper ASstepper2(AccelStepper::DRIVER, 9, 8);
+AccelStepper ASstepper2(AccelStepper::DRIVER, 2, 3);
 void ActiverStepper2() {
 	ASstepper2.run();
 }
@@ -24,7 +24,7 @@ bool calibration;
 bool pret;
 bool finPrescription;
 int posTetePrescription;
-int servoPin = 3;
+int servoPin = 12;
 int posAjustement = (int)(800 / (18*PI)); // Ajustement de 5mm linéaire
 bool ouvertureFermeture;
 bool ajustement;
