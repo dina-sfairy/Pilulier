@@ -100,7 +100,7 @@ void loop(){
     */
     //UNCOMMENT Pour utiliser code de calibration
     
-    while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){
+    while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){ // Faire requestFrom puis Wire.read - mettre variables dans parenthèses de boucle
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
@@ -214,7 +214,7 @@ void loop(){
                             verifCommande();
                             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                            while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                            while(Wire.requestFrom(ADRESSE_COMP,1)==0){ // Wire.read apres
                                 //moteur stop necessaire DC
                             }
                             Wire.beginTransmission(ADRESSE_COMP);
@@ -227,7 +227,7 @@ void loop(){
                                 DCrapide->run(RELEASE);
                                 momentDone = true; 
                                 //Attend que cassette soit en place et qu'elle envoie son status
-                                while(Wire.requestFrom(ADRESSE_DIST,1)==0){
+                                while(Wire.requestFrom(ADRESSE_DIST,1)==0){ // wire.read
                                     verifCommande();
                                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
@@ -236,8 +236,14 @@ void loop(){
                                     delay(500);
                                 }
                                 Serial.println("cassette prete et en place"); //print pour les tests
-                                while(Wire.requestFrom(ADRESSE_COMP,1)==0){
-                                }
+                                int etat = 0;
+                                while(!etat){
+                                  Wire.requestFrom(ADRESSE_COMP,1);
+                                  etat = Wire.read();
+                                  delay(100);
+                                } 
+                                Serial.print("état = ");
+                                Serial.println(etat);
                                 Wire.beginTransmission(ADRESSE_COMP);
                                 Wire.write(deplacement[compteur2][momentEnCours]);
                                 Wire.endTransmission();
@@ -255,14 +261,18 @@ void loop(){
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
-                while(Wire.requestFrom(ADRESSE_COMP,1)== false){
+                int etat = 0;
+                while(!etat){
+                  Wire.requestFrom(ADRESSE_COMP,1);
+                  etat = Wire.read();
+                  delay(100);
                     verifCommande();
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 }
                 
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
-                delay(1000);
+                //delay(2000);
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours+1);
                 Wire.endTransmission();

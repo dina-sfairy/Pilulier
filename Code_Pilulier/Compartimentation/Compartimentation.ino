@@ -25,13 +25,13 @@ bool pret;
 bool finPrescription;
 int posTetePrescription;
 int servoPin = 12;
-int posAjustement = (int)(800 / (18*PI)); // Ajustement de 5mm linéaire
+int posAjustement = (int)(800 / (18*PI)); // Ajustement de 5mm linï¿½aire
 bool ouvertureFermeture;
 bool ajustement;
 // Create a servo object 
 Servo Servo1;
 
-int etat; // Variable déterminant l'état de complétion d'une prescription par le tapis de compartimentation. Cette variable est renvoyée au Master sur demande.
+int etat; // Variable dï¿½terminant l'ï¿½tat de complï¿½tion d'une prescription par le tapis de compartimentation. Cette variable est renvoyï¿½e au Master sur demande.
 
 void setup() {
 	// Define the LED pin as Output
@@ -53,7 +53,7 @@ void setup() {
 	Servo1.attach(servoPin);
 	Serial.println(Servo1.read());
 	Servo1.write(180);
-	//Servo1.write(0); // À ajuster en fonction de la position réelle pour que la trappe soit horizontale initialement
+	//Servo1.write(0); // ï¿½ ajuster en fonction de la position rï¿½elle pour que la trappe soit horizontale initialement
 	delay(500);
 }
 void receiveEvent(int bytes) {
@@ -68,7 +68,7 @@ void receiveEvent(int bytes) {
 	switch (jour)
 	{
 	case 0:
-		pos = (int) (jour*190/PI); // 190/PI steps pour déplacer latéralement de 45mm lorsque MS! et MS2 sont au ground
+		pos = (int) (jour*190/PI); // 190/PI steps pour dï¿½placer latï¿½ralement de 45mm lorsque MS! et MS2 sont au ground
 		break;
 	case 1:
 		pos = (int)(jour * 190 / PI);
@@ -117,7 +117,7 @@ void receiveEvent(int bytes) {
 		pret = true;
 	}
 	
-	// Si MS1 et MS2 ne sont pas connectés au ground, 1600 steps = 1 tour
+	// Si MS1 et MS2 ne sont pas connectï¿½s au ground, 1600 steps = 1 tour
 	ASstepper2.setCurrentPosition(0);
 	ASstepper2.moveTo(pos);
 }
@@ -141,7 +141,7 @@ void loop() {
 			Servo1.write(Servo1.read() - 90);
 			delay(500);
 			Servo1.write(Servo1.read() + 90);
-			delay(500);
+			delay(2000);
 			posTetePrescription = 0;
 			pret = true;
 
@@ -153,13 +153,13 @@ void loop() {
 			ASstepper2.setCurrentPosition(0);
 			ASstepper2.moveTo(pos);
 			posTetePrescription = 7;
-			goto label; // On ne veut pas faire la calibration avant d'avoir ajusté la position de la tête de prescription, donc on passe au-dessu de la première étape pour la première itération
+			goto label; // On ne veut pas faire la calibration avant d'avoir ajustï¿½ la position de la tï¿½te de prescription, donc on passe au-dessu de la premiï¿½re ï¿½tape pour la premiï¿½re itï¿½ration
 		}
 
 	
 		
-		// Vérification de la calibration de la case Init. Si le capteur ne détecte rien, on incrémente le tapis de 5mm
-		if (digitalRead(6) != 0) { // À modifier selon le type de capteur requis. Ici on utilise un interrupteur
+		// Vï¿½rification de la calibration de la case Init. Si le capteur ne dï¿½tecte rien, on incrï¿½mente le tapis de 5mm
+		if (digitalRead(6) != 0) { // ï¿½ modifier selon le type de capteur requis. Ici on utilise un interrupteur
 			ASstepper2.setCurrentPosition(0);
 			ASstepper2.moveTo(posAjustement);
 		}
@@ -171,7 +171,7 @@ void loop() {
 	}
 	
 	if (calibration && ASstepper2.distanceToGo() == 0 && !pret) {
-		if (digitalRead(6) != 0) { // À modifier selon le type de capteur requis. Ici on utilise un interrupteur
+		if (digitalRead(6) != 0) { // ï¿½ modifier selon le type de capteur requis. Ici on utilise un interrupteur
 			ASstepper2.setCurrentPosition(0);
 			ASstepper2.moveTo(posAjustement);
 		}
