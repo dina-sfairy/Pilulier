@@ -89,7 +89,7 @@ void loop(){
           }
         if (capteurPil && capteurPur){ready = true;}
     }
-
+    /*
     //Envoi de la commande de calibration - '20' correpond à la commande de calibration
     Wire.beginTransmission(ADRESSE_COMP);
     Wire.write(20);
@@ -97,13 +97,14 @@ void loop(){
     Wire.beginTransmission(ADRESSE_DIST);
     Wire.write(20);
     Wire.endTransmission();
+    */
     //UNCOMMENT Pour utiliser code de calibration
-    /*
+    
     while(Wire.requestFrom(ADRESSE_COMP,1)==0 && Wire.requestFrom(ADRESSE_DIST,1)==0){
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
-    */
+    
     Serial.println("Les slaves sont calibres et ready");   //print pour les tests
 
     if (ready){
@@ -221,11 +222,11 @@ void loop(){
                                 DCrapide->run(RELEASE);
                                 momentDone = true; 
                                 //Attend que cassette soit en place et qu'elle envoie son status
-                    //            while(Wire.requestFrom(ADRESSE_DIST,1)==0){
-                    //                verifCommande();
-                    //                //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-                    //                //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
-                    //            }
+                                while(Wire.requestFrom(ADRESSE_DIST,1)==0){
+                                    verifCommande();
+                                    //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                                    //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
+                                }
                                 Serial.println("cassette prete et en place"); //print pour les tests
                                 Wire.beginTransmission(ADRESSE_COMP);
                                 Wire.write(deplacement[compteur2][momentEnCours]);
@@ -241,11 +242,11 @@ void loop(){
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
-        //        while(Wire.requestFrom(ADRESSE_COMP,1)==0){
-        //            verifCommande();
-        //            //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-        //            //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
-        //        }
+                while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                    verifCommande();
+                    //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                    //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                }
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours);
