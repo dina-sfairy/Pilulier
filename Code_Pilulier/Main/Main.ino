@@ -209,15 +209,18 @@ void loop(){
                     if(distancePil2 < DIST_SEUIL2){
                         if(samePil2 == false){
                             samePil2 = true;
-                            Serial.println("pilule captee par capteur 2"); //print pour les tests
+                            Serial.println("pilule captee par capteur 2, deplacement ="); //print pour les tests
+                            Serial.println(deplacement[compteur2][momentEnCours]);
                             verifCommande();
                             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                                //moteur stop necessaire DC
                             }
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
-                            Wire.endTransmission();                        
+                            Wire.endTransmission();      
+                            delay(50);                  
                             compteur2++;
                             if(deplacement[compteur2][momentEnCours]==8){
                                 Serial.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
@@ -235,10 +238,12 @@ void loop(){
                                 Serial.println("cassette prete et en place"); //print pour les tests
                                 while(Wire.requestFrom(ADRESSE_COMP,1)==0){
                                 }
-                                delay(1000);
                                 Wire.beginTransmission(ADRESSE_COMP);
                                 Wire.write(deplacement[compteur2][momentEnCours]);
                                 Wire.endTransmission();
+                                delay(50);
+                                Serial.println(Wire.requestFrom(ADRESSE_COMP,1));
+                                //delay(1000);
                                 Serial.println("commande envoyer au slave compartimentation"); //print pour les tests
                             }
                         } else {
@@ -250,15 +255,18 @@ void loop(){
                     }
                 }
                 //Attend que le tapis de compartimentation soit en place
-                while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                while(Wire.requestFrom(ADRESSE_COMP,1)== false){
                     verifCommande();
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 }
+                
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
+                delay(5000);
                 Wire.beginTransmission(ADRESSE_DIST);
-                Wire.write(momentEnCours);
+                Wire.write(momentEnCours+1);
                 Wire.endTransmission();
+                delay(50);
                 Serial.println("commande envoyer au slave distribution"); //print pour les tests
                 
                 if(compteur1 > compteur2){
