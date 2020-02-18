@@ -4,14 +4,16 @@
 
 int nano_comp = 1;
 int nano_dist = 1;
-int test[7] = { 1,0,0,2,1,1,0 };
+//int test[7] = { 1,0,0,2,1,1,0 };
+int test[7] = { 1,1,1,1,1,1,1 };
+
 int test_dist[4] = { 1,2,3,4 };
 int pos;
 bool ready;
 int presentTime = 0;
 int chiffre;
 // Test de vérification
-TimedAction timedActionComp = TimedAction(2000, commanderCompartimentation);
+TimedAction timedActionComp = TimedAction(3000, commanderCompartimentation);
 TimedAction timedActionDist = TimedAction(8000, commanderDistribution);
 
 int vect[10];
@@ -32,8 +34,8 @@ void setup() {
 
 void loop() {
 	
-	//timedActionComp.check();
-	timedActionDist.check();
+	timedActionComp.check();
+	//timedActionDist.check();
 	
 	
 
@@ -67,6 +69,7 @@ void commanderCompartimentation() {
 	Wire.beginTransmission(10); // transmit to device #11
 	Wire.write(nano_comp);              // sends x 
 	Wire.endTransmission();    // stop transmitting
+	delay(50);
 	//nano_comp++;
 	if (pos == 7) {
 		pos = 0;
@@ -76,12 +79,17 @@ void commanderCompartimentation() {
 		{
 			ready = Wire.read();
 			Serial.print("Slave pret : "); Serial.println(ready);
+			if (ready) {
+				Wire.beginTransmission(10); // transmit to device #10
+				Wire.write(8);              // sends x 
+				Wire.endTransmission();
+				delay(50);
+				//Serial.println(8);
+				ready = false;
+				break;
+			}
 		}
-		if (ready) {
-			Wire.beginTransmission(10); // transmit to device #10
-			Wire.write(8);              // sends x 
-			Wire.endTransmission();
-		}
+		
 	}
 	
 	
