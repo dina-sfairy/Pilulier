@@ -213,6 +213,8 @@ void loop(){
                             verifCommande();
                             //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+                            while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                            }
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
                             Wire.endTransmission();                        
@@ -227,7 +229,13 @@ void loop(){
                                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
                                 }
+                                if(deplacement[compteur2-1][momentEnCours]==0){
+                                    delay(500);
+                                }
                                 Serial.println("cassette prete et en place"); //print pour les tests
+                                while(Wire.requestFrom(ADRESSE_COMP,1)==0){
+                                }
+                                delay(1000);
                                 Wire.beginTransmission(ADRESSE_COMP);
                                 Wire.write(deplacement[compteur2][momentEnCours]);
                                 Wire.endTransmission();
