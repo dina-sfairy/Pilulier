@@ -262,7 +262,7 @@ void loop(){
                 }
                 
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
-                delay(5000);
+                delay(1000);
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours+1);
                 Wire.endTransmission();
