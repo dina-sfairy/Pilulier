@@ -136,6 +136,7 @@ void loop() {
 		pret = true;
 	}
 	if (finPrescription && ASstepper2.distanceToGo() == 0) {
+		pret = false;
 		if (posTetePrescription == 7) {
 			pret = false;
 			Servo1.write(Servo1.read() - 90);
