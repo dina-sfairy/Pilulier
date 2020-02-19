@@ -313,7 +313,7 @@ void loop(){
 void purgePartielle() {
   DClent->run(RELEASE);
   DCrapide->run(BACKWARD); 
-  delay(5000); // Temps à déterminer
+  //delay(5000); // Temps à déterminer, uncomment pour vrai code
   DCrapide->run(RELEASE);
 }
 
