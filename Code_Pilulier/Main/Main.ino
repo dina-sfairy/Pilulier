@@ -9,7 +9,7 @@ VL53L0X sensor1, sensor2;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
-bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2;
+bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2, recuComp, recuDist;
 int tailleVect[4]; 
 int pilParMoment[4]; 
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
@@ -45,6 +45,8 @@ void initVar(){
     PrescDone = false;
     samePil1 = false;
     samePil2 = false;
+    recuDist = false;
+    recuComp = false;
     memset(tailleVect, 0, sizeof(tailleVect));
     memset(pilParMoment, 0, sizeof(pilParMoment));
     memset(deplacement, 0, sizeof(deplacement));
@@ -99,8 +101,8 @@ void loop(){
     Wire.endTransmission();
     */
     //UNCOMMENT Pour utiliser code de calibration
-    bool recuComp = false; 
-    bool recuDist = false;
+    recuComp = false;
+    recuDist = false;
     while(!recuComp && !recuDist){ 
         Wire.requestFrom(ADRESSE_COMP,1);
         recuComp = Serial.read();
@@ -224,6 +226,7 @@ void loop(){
                                 //moteur stop necessaire DC
                                 Wire.requestFrom(ADRESSE_COMP, 1);
                                 recuComp = Wire.read();
+                                verifCommande();
                             }
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
@@ -243,23 +246,17 @@ void loop(){
                                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier 
                                 }
-                                if(deplacement[compteur2-1][momentEnCours]==0){
-                                    delay(500);
-                                }
                                 Serial.println("cassette prete et en place"); //print pour les tests
                                 recuComp = false;
                                 while(!recuComp){
                                   Wire.requestFrom(ADRESSE_COMP,1);
                                   recuComp = Wire.read();
-                                  delay(100);
                                 } 
+                                delay(500);
                                 Wire.beginTransmission(ADRESSE_COMP);
                                 Wire.write(deplacement[compteur2][momentEnCours]);
                                 Wire.endTransmission();
                                 delay(50);
-                                Wire.requestFrom(ADRESSE_COMP,1)
-                                Serial.println(Wire.read());
-                                //delay(1000);
                                 Serial.println("commande envoyer au slave compartimentation"); //print pour les tests
                             }
                         } else {
@@ -273,16 +270,15 @@ void loop(){
                 //Attend que le tapis de compartimentation soit en place
                 recuComp = false;
                 while(!recuComp){
-                  Wire.requestFrom(ADRESSE_COMP,1);
-                  recuComp = Wire.read();
-                  delay(100);
+                    Wire.requestFrom(ADRESSE_COMP,1);
+                    recuComp = Wire.read();
+                    delay(50);
                     verifCommande();
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 }
                 
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
-                //delay(2000);
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours+1);
                 Wire.endTransmission();
