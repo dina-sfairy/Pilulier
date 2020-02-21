@@ -24,6 +24,7 @@ const int DIST_SEUIL2 = 40;
 const long TEMPS_MAX = 200;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
+const int SENSOR_BLEU_SHUT_PIN = 11;
 const int SENSOR1_XSHUNT_PIN = 12;
 const int SENSOR2_XSHUNT_PIN = 13;
 const uint8_t SENSOR1_ADDRESS = 5;
@@ -59,8 +60,10 @@ void setup() {
     //Association des adresses des capteurs
     pinMode(SENSOR1_XSHUNT_PIN, OUTPUT);
     pinMode(SENSOR2_XSHUNT_PIN, OUTPUT);
+    pinMode(SENSOR_BLEU_SHUT_PIN, OUTPUT);
     digitalWrite(SENSOR1_XSHUNT_PIN, LOW);
     digitalWrite(SENSOR2_XSHUNT_PIN, LOW);
+    digitalWrite(SENSOR_BLEU_SHUT_PIN, LOW);
     Serial.begin(115200);
     Wire.begin();
     //Set les adresses des capteurs
@@ -68,10 +71,11 @@ void setup() {
     initVar();
 
     //Connecter un DC motor au port M1 et l'autre au port M3
+    AFMS.begin();
     DClent = AFMS.getMotor(1);
     DCrapide = AFMS.getMotor(3);
-    DClent->setSpeed(200); // À déterminer
-    DCrapide->setSpeed(300); // À déterminer
+    DClent->setSpeed(150); // À déterminer
+    DCrapide->setSpeed(150); // À déterminer
 }
 
 void loop(){
@@ -284,7 +288,8 @@ void loop(){
                 Wire.endTransmission();
                 delay(50);
                 Serial.println("commande envoyer au slave distribution"); //print pour les tests
-                
+                DClent->run(FORWARD);
+                DCrapide->run(FORWARD);
                 if(compteur1 > compteur2){
                     Serial.println("compteur 1 plus élevé que compteur 2"); //print pour les tests
                     compteurTot += compteur2;
@@ -318,7 +323,7 @@ void purgePartielle() {
 }
 
 void purgeComplete() {
-    DClent->setSpeed(500); // À déterminer
+    DClent->setSpeed(150); // À déterminer
     DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
     DCrapide->run(BACKWARD); 
     //delay à déterminer
@@ -373,16 +378,20 @@ void verifPil(){
 void setSensorsAddress() {
   // Changer l'addresse du sensor1
   pinMode(SENSOR1_XSHUNT_PIN, INPUT);
-  delay(100);
+  delay(50);
   sensor1.init(true);
-  delay(100);
+  delay(50);
   sensor1.setAddress(SENSOR1_ADDRESS);
-  delay(100);
+  delay(50);
   // Changer l'addresse du sensor2
   pinMode(SENSOR2_XSHUNT_PIN, INPUT);
-  delay(100);
+  delay(50);
   sensor2.init(true);
-  delay(100);
+  delay(50);
   sensor2.setAddress(SENSOR2_ADDRESS);
-  delay(100);
+  delay(50);
+
+  // Activer le sensor bleu
+  pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
+  delay(50);
 }

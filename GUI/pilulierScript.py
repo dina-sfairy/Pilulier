@@ -42,7 +42,7 @@ class ApplicationPilulier:
         self.systemControl = 0
 
         # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM2', 115200)
+        self.serPort = serial.Serial('COM4', 115200)
         time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
@@ -88,9 +88,13 @@ class ApplicationPilulier:
 
             # Lire le message du uC
             ligneLue = self.serPort.readline()
-            ligneLue = str(ligneLue.decode('utf-8'))
+            try:
+                ligneLue = str(ligneLue.decode('utf-8'))
+            except Exception:
+                ligneLue = "Il y eu une erreur, mais je l'ai catch."
             ligneLue = ligneLue.strip()
             print(ligneLue)
+
             if (ligneLue == "e1"):
                 self.messageAAfficher = "Le pilulier est mal placé."
                 self.messageNeedsUpdate = True
