@@ -79,6 +79,8 @@ void setup() {
 }
 
 void loop(){
+    DClent->run(RELEASE);
+    DCrapide->run(RELEASE);
     //Réinitialise les valeurs des variables
     initVar();
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
@@ -95,15 +97,7 @@ void loop(){
           }
         if (capteurPil && capteurPur){ready = true;}
     }
-    /*
-    //Envoi de la commande de calibration - '20' correpond à la commande de calibration
-    Wire.beginTransmission(ADRESSE_COMP);
-    Wire.write(20);
-    Wire.endTransmission();
-    Wire.beginTransmission(ADRESSE_DIST);
-    Wire.write(20);
-    Wire.endTransmission();
-    */
+
     //UNCOMMENT Pour utiliser code de calibration
     recuComp = false;
     recuDist = false;
@@ -156,7 +150,7 @@ void loop(){
             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
             timePilule = millis();
             DClent->run(FORWARD); // Démarrer moteur lent de séparation
-
+            DCrapide->run(FORWARD);
             //Code de remplissage de prescription
             //Boucle pour une prescription 
             while(PrescDone == false){
@@ -174,7 +168,6 @@ void loop(){
                     Serial.println("f");
                     break;
                 }
-                DCrapide->run(FORWARD);
                 Serial.print("Debut moment de journée :"); Serial.println(momentEnCours); //print pour les tests
                 timePilule = millis();
                 while(momentDone == false){
@@ -227,11 +220,12 @@ void loop(){
                             //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                             recuComp = false;
                             while(!recuComp){ 
-                                //moteur stop necessaire DC
+                                DCrapide->run(RELEASE);//moteur stop necessaire DC
                                 Wire.requestFrom(ADRESSE_COMP, 1);
                                 recuComp = Wire.read();
                                 verifCommande();
                             }
+                            DCrapide->run(FORWARD);
                             Wire.beginTransmission(ADRESSE_COMP);
                             Wire.write(deplacement[compteur2][momentEnCours]);
                             Wire.endTransmission();      
@@ -239,6 +233,7 @@ void loop(){
                             compteur2++;
                             if(deplacement[compteur2][momentEnCours]==8){
                                 Serial.println("derniere pilule a ete captee et envoie de commande de fin"); //print pour les tests
+                                delay(1000);
                                 DCrapide->run(RELEASE);
                                 momentDone = true; 
                                 //Attend que cassette soit en place et qu'elle envoie son status
@@ -333,7 +328,13 @@ void purgeComplete() {
 
 void arret(){
     DClent->run(RELEASE);
-    DClent->run(RELEASE);
+    DCrapide->run(RELEASE);
+    Wire.beginTransmission(ADRESSE_DIST);
+    Wire.endTransmission();
+    Wire.write(0);
+    Wire.beginTransmission(ADRESSE_COMP);
+    Wire.endTransmission();
+    Wire.write(0);
     Serial.println("ok");
 }
 
@@ -348,6 +349,8 @@ void verifCommande(){
         case 3: 
             timePilule = millis();
             Serial.println("Redemarrage reussi");       //print pour les tests
+            DCrapide->run(FORWARD);
+            DClent->run(FORWARD);
             break;
         default:
             Serial.println("Commande recue inconnue");  //print pour les tests
