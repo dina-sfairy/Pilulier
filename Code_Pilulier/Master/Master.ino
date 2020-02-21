@@ -5,7 +5,7 @@
 int nano_comp = 1;
 int nano_dist = 1;
 //int test[7] = { 1,0,0,2,1,1,0 };
-int test[7] = { 1,1,1,1,1,1,1 };
+int test[7] = { 4,4,4,4,4,4,4 };
 
 int test_dist[4] = { 1,2,3,4 };
 int pos;
@@ -13,7 +13,7 @@ bool ready;
 int presentTime = 0;
 int chiffre;
 // Test de vérification
-TimedAction timedActionComp = TimedAction(3000, commanderCompartimentation);
+TimedAction timedActionComp = TimedAction(7000, commanderCompartimentation);
 TimedAction timedActionDist = TimedAction(8000, commanderDistribution);
 
 int vect[10];
@@ -72,11 +72,12 @@ void commanderCompartimentation() {
 	delay(50);
 	//nano_comp++;
 	if (pos == 7) {
-		pos = 0;
 		ready = false;
-		Wire.requestFrom(10, 1);
+		Wire.requestFrom(10, 2);
+		delay(2000);
 		while (Wire.available())
 		{
+			pos = 0;
 			ready = Wire.read();
 			Serial.print("Slave pret : "); Serial.println(ready);
 			if (ready) {
@@ -88,6 +89,7 @@ void commanderCompartimentation() {
 				ready = false;
 				break;
 			}
+
 		}
 		
 	}

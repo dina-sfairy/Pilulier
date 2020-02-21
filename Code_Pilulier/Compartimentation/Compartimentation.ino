@@ -25,7 +25,7 @@ bool pret;
 bool finPrescription;
 int posTetePrescription;
 int servoPin = 12;
-int posAjustement = (int)(800 / (18*PI)); // Ajustement de 5mm lin�aire
+int posAjustement = (int)(22/PI); // Ajustement de 5mm lin�aire
 bool ouvertureFermeture;
 bool ajustement;
 // Create a servo object 
@@ -35,8 +35,8 @@ int etat; // Variable d�terminant l'�tat de compl�tion d'une prescription 
 
 void setup() {
 	// Define the LED pin as Output
-	ASstepper2.setMaxSpeed(200); // 200 et 400 acc
-	ASstepper2.setAcceleration(100);
+	ASstepper2.setMaxSpeed(50); // 200 et 400 acc
+	ASstepper2.setAcceleration(50);
 	// Start the I2C Bus as Slave on address 10
 	Wire.begin(10);
 	// Attach a function to trigger when something is received.
@@ -104,18 +104,22 @@ void receiveEvent(int bytes) {
 		nbSteps = 0;
 		finPrescription = true;
 		ouvertureFermeture = true;
-		ajustement = true;
+		if (posTetePrescription < 7)
+		{
+			ajustement = true;
+		}
+		else
+			ajustement = false;
 
+	case 9:
+		pos = posAjustement;
+		break;
 
 	default:
 		pos = 0;
 		break;
 	}
 
-	if (posTetePrescription == 7)
-	{
-		pret = true;
-	}
 	
 	// Si MS1 et MS2 ne sont pas connect�s au ground, 1600 steps = 1 tour
 	ASstepper2.setCurrentPosition(0);
@@ -142,7 +146,7 @@ void loop() {
 			Servo1.write(Servo1.read() - 90);
 			delay(500);
 			Servo1.write(Servo1.read() + 90);
-			delay(2000);
+			delay(500);
 			posTetePrescription = 0;
 			pret = true;
 
@@ -154,21 +158,12 @@ void loop() {
 			ASstepper2.setCurrentPosition(0);
 			ASstepper2.moveTo(pos);
 			posTetePrescription = 7;
-			goto label; // On ne veut pas faire la calibration avant d'avoir ajust� la position de la t�te de prescription, donc on passe au-dessu de la premi�re �tape pour la premi�re it�ration
+			finPrescription = true;
 		}
-
-	
-		
-		// V�rification de la calibration de la case Init. Si le capteur ne d�tecte rien, on incr�mente le tapis de 5mm
-		if (digitalRead(6) != 0) { // � modifier selon le type de capteur requis. Ici on utilise un interrupteur
-			ASstepper2.setCurrentPosition(0);
-			ASstepper2.moveTo(posAjustement);
-		}
-		else {
-			finPrescription = false;
-			pret = true;
+		else
 			posTetePrescription = 0;
-		}		
+
+		
 	}
 	
 	if (calibration && ASstepper2.distanceToGo() == 0 && !pret) {
@@ -181,7 +176,6 @@ void loop() {
 			calibration = false;
 			posTetePrescription = 0;
 		}
-	label:;
 	}
 
 
