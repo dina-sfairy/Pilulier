@@ -33,8 +33,8 @@ Servo Servo1;
 void setup() {
 	// Define the LED pin as Output
 	pinMode(LED, OUTPUT);
-	ASstepper2.setMaxSpeed(600);
-	ASstepper2.setAcceleration(300);
+	ASstepper2.setMaxSpeed(400);
+	ASstepper2.setAcceleration(200);
 	ASstepper2.setCurrentPosition(0);
 	// Start the I2C Bus as Slave on address 11
 	Wire.begin(11);
