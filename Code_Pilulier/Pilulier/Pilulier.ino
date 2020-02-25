@@ -19,7 +19,7 @@ long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
 const int DIST_SEUIL1 = 70;
 const int DIST_SEUIL2 = 40;
-const long TEMPS_MAX = 15;      //à changer après test
+const long TEMPS_MAX = 100;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
 const int SENSOR_BLEU_SHUT_PIN = 11;
@@ -76,8 +76,8 @@ void loop(){
     DCrapide->run(RELEASE);
     initVar();  //Réinitialise les valeurs des variables
     //Tant que le pilulier et la purge ne sont pas bien en place le système ne commence pas
-    verifPurge();
-    verifPil();
+    //verifPurge();
+    //verifPil();
 
     //Tant que les salves ne sont pas prêt le système ne commence pas
     recuComp = false;
@@ -97,7 +97,7 @@ void loop(){
     commande = Serial.read();
     //la commande 1 correspond à l'appui du bouton démarrer
     if (commande == 1){
-        delay(10);
+        delay(100);
         //Acquisition du vecteur de taille des vecteurs déplacement/moment
         for(int i = 0; i<4; i++){
             tailleVect[i] = Serial.read();
@@ -110,6 +110,7 @@ void loop(){
                 deplacement[k][j] = Serial.read();
             }
         }
+        Serial.println("Prescription recue et bien lue");  //print pour les tests
         verifCommande();
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -132,6 +133,7 @@ void loop(){
                 break;
             }
             timePilule = millis();
+            Serial.print("Debut moment de journée :"); Serial.println(momentEnCours); //print pour les tests
             while(momentDone == false){
                 verifCommande();
                 //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -294,6 +296,8 @@ void pause(){
     DCrapide->run(RELEASE);
     commSlave(ADRESSE_DIST, 0);
     commSlave(ADRESSE_COMP, 0);
+    //Boucle qui attend qu'on pèse sur redémarrer
+    //update timer
 }
 
 //Fonction de vérification: vérifie si l'interface tente de communiquer avec le master
@@ -303,7 +307,7 @@ void verifCommande(){
         commande = Serial.read();
         switch (commande) {
         case 2:
-            arret();
+            pause(); //à changer parce que lié au bouton pause qui n'existe pas
             break;
         case 3: 
             timePilule = millis();
