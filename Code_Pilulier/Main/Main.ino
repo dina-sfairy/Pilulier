@@ -19,12 +19,12 @@ byte commande;
 byte matricePrescription[7][4];
 long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
-const int DIST_SEUIL1 = 70;
-const int DIST_SEUIL2 = 40;
+const int DIST_SEUIL1 = 60;
+const int DIST_SEUIL2 = 35;
 const long TEMPS_MAX = 200;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
-const int SENSOR_BLEU_SHUT_PIN = 11;
+//const int SENSOR_BLEU_SHUT_PIN = 11;
 const int SENSOR1_XSHUNT_PIN = 12;
 const int SENSOR2_XSHUNT_PIN = 13;
 const uint8_t SENSOR1_ADDRESS = 5;
@@ -60,10 +60,10 @@ void setup() {
     //Association des adresses des capteurs
     pinMode(SENSOR1_XSHUNT_PIN, OUTPUT);
     pinMode(SENSOR2_XSHUNT_PIN, OUTPUT);
-    pinMode(SENSOR_BLEU_SHUT_PIN, OUTPUT);
+    //pinMode(SENSOR_BLEU_SHUT_PIN, OUTPUT);
     digitalWrite(SENSOR1_XSHUNT_PIN, LOW);
     digitalWrite(SENSOR2_XSHUNT_PIN, LOW);
-    digitalWrite(SENSOR_BLEU_SHUT_PIN, LOW);
+    //digitalWrite(SENSOR_BLEU_SHUT_PIN, LOW);
     Serial.begin(115200);
     Wire.begin();
     //Set les adresses des capteurs
@@ -74,7 +74,7 @@ void setup() {
     AFMS.begin();
     DClent = AFMS.getMotor(1);
     DCrapide = AFMS.getMotor(3);
-    DClent->setSpeed(150); // À déterminer
+    DClent->setSpeed(200); // À déterminer
     DCrapide->setSpeed(150); // À déterminer
 }
 
@@ -185,8 +185,10 @@ void loop(){
                         }
                         verifCommande();
                     }
+                    Serial.println("avant lecture");
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
+                    Serial.println("après lecture");
                     //Vérifie si une pilule passe devant le capteur1
                     if(distancePil1 < DIST_SEUIL1){
                         if(samePil1 == false){
@@ -313,20 +315,22 @@ void loop(){
 void purgePartielle() {
   DClent->run(RELEASE);
   DCrapide->run(BACKWARD); 
-  //delay(5000); // Temps à déterminer, uncomment pour vrai code
+  delay(2000); // Temps à déterminer, uncomment pour vrai code
   DCrapide->run(RELEASE);
 }
 
 void purgeComplete() {
-    DClent->setSpeed(150); // À déterminer
+    DClent->setSpeed(300); // À déterminer
     DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
     DCrapide->run(BACKWARD); 
-    //delay à déterminer
+    delay(5000);
     DClent->run(RELEASE);
     DClent->run(RELEASE);
+    initVar();
 }
 
 void arret(){
+    purgeComplete();
     DClent->run(RELEASE);
     DCrapide->run(RELEASE);
     Wire.beginTransmission(ADRESSE_DIST);
@@ -395,6 +399,6 @@ void setSensorsAddress() {
   delay(50);
 
   // Activer le sensor bleu
-  pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
+  //pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
   delay(50);
 }

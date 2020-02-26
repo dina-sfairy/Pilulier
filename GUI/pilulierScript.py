@@ -88,10 +88,10 @@ class ApplicationPilulier:
 
             # Lire le message du uC
             ligneLue = self.serPort.readline()
-            #try:
-            ligneLue = str(ligneLue.decode('utf-8'))
-            #except Exception:
-            #    ligneLue = "Il y eu une erreur, mais je l'ai catch."
+            try:
+                ligneLue = str(ligneLue.decode('utf-8'))
+            except Exception:
+                ligneLue = "Il y eu une erreur, mais je l'ai catch."
             ligneLue = ligneLue.strip()
             print(ligneLue)
 
