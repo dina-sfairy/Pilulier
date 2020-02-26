@@ -68,8 +68,9 @@ void setup() {
     Wire.begin();
     //Set les adresses des capteurs
     setSensorsAddress();
+    Serial.println("apres sensor address");
     initVar();
-
+    Serial.println(" apres initVar");
     //Connecter un DC motor au port M1 et l'autre au port M3
     AFMS.begin();
     DClent = AFMS.getMotor(1);
@@ -79,6 +80,7 @@ void setup() {
 }
 
 void loop(){
+    Serial.println("debut loop");
     DClent->run(RELEASE);
     DCrapide->run(RELEASE);
     //Réinitialise les valeurs des variables
@@ -101,6 +103,7 @@ void loop(){
     //UNCOMMENT Pour utiliser code de calibration
     recuComp = false;
     recuDist = false;
+    Serial.println("avant slave");
     while(!recuComp && !recuDist){ 
         Wire.requestFrom(ADRESSE_COMP,1);
         recuComp = Serial.read();
@@ -109,7 +112,8 @@ void loop(){
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
-    
+    Serial.println("apres slave");
+
     Serial.println("Les slaves sont calibres et ready");   //print pour les tests
 
     if (ready){
@@ -185,10 +189,8 @@ void loop(){
                         }
                         verifCommande();
                     }
-                    Serial.println("avant lecture");
                     distancePil1 = sensor1.readRangeSingleMillimeters();
                     distancePil2 = sensor2.readRangeSingleMillimeters();
-                    Serial.println("après lecture");
                     //Vérifie si une pilule passe devant le capteur1
                     if(distancePil1 < DIST_SEUIL1){
                         if(samePil1 == false){
@@ -320,12 +322,12 @@ void purgePartielle() {
 }
 
 void purgeComplete() {
-    DClent->setSpeed(300); // À déterminer
+    DClent->setSpeed(250); // À déterminer
     DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
     DCrapide->run(BACKWARD); 
     delay(5000);
     DClent->run(RELEASE);
-    DClent->run(RELEASE);
+    DCrapide->run(RELEASE);
     initVar();
 }
 
@@ -366,7 +368,7 @@ void verifCommande(){
 
 void verifPurge(){
     if(digitalRead(capPurPin)){
-        arret();
+        arret();//à modifier
         Serial.println("e2");
         Serial.println("Veuillez bien insérer le récipient de purge");
         ready = false;
@@ -383,22 +385,29 @@ void verifPil(){
 }
 
 void setSensorsAddress() {
-  // Changer l'addresse du sensor1
-  pinMode(SENSOR1_XSHUNT_PIN, INPUT);
-  delay(50);
-  sensor1.init(true);
-  delay(50);
-  sensor1.setAddress(SENSOR1_ADDRESS);
-  delay(50);
-  // Changer l'addresse du sensor2
-  pinMode(SENSOR2_XSHUNT_PIN, INPUT);
-  delay(50);
-  sensor2.init(true);
-  delay(50);
-  sensor2.setAddress(SENSOR2_ADDRESS);
-  delay(50);
+    // Changer l'addresse du sensor1
+    pinMode(SENSOR1_XSHUNT_PIN, INPUT);
+    delay(100);
+    Serial.println("avant init sensor1");
+    while(sensor1.init(true)==0){
+        delay(20);
+    }
+    Serial.println("sensor 1 ready");
+    delay(100);
+    sensor1.setAddress(SENSOR1_ADDRESS);
+    delay(100);
+    // Changer l'addresse du sensor2
+    pinMode(SENSOR2_XSHUNT_PIN, INPUT);
+    delay(100);
+    while(sensor2.init(true)==0){
+        delay(20);
+    }
+    Serial.println("sensor 2 ready");
+    delay(100);
+    sensor2.setAddress(SENSOR2_ADDRESS);
+    delay(100);
 
-  // Activer le sensor bleu
-  //pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
-  delay(50);
+    // Activer le sensor bleu
+    //pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
+    delay(50);
 }
