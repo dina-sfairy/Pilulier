@@ -4,6 +4,7 @@ Code de Comm de l'interface au mega
 2 = stop
 3 = redémarrer
 4 = purge complète
+5 = pause
 
 
 

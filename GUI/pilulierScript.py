@@ -21,6 +21,7 @@ class ApplicationPilulier:
         self.ui.messagesTextEdit.setReadOnly(True)
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonRedemarrer.setEnabled(False)
+        self.ui.boutonPause.setEnabled(False)
         self.ui.listePrescriptions.setCurrentRow(0)  # Par défaut, PyQt retourne 0 lorsqu'on appelle currentRow. Cette
         # ligne fait ensorte que l'item soit surligné au démarage.
 
@@ -56,7 +57,9 @@ class ApplicationPilulier:
         self.afficherPrescription()
 
         self.prescriptionEnCoursIndex = 0  # sert à suivre où nous sommes rendu dans la distribution
-        self.ui.messagesTextEdit.setText("Verser les pilules de type "
+        self.ui.messagesTextEdit.setText("Verser au moins "
+                                         + str(self.getNombrePilulesRequis(self.prescriptionEnCoursIndex))
+                                         + " pillules du type "
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
                                          + " dans le système.")
 
@@ -68,10 +71,18 @@ class ApplicationPilulier:
         self.systemControl = 2
         self.ui.boutonArreter.setEnabled(True)
         self.ui.boutonRedemarrer.setEnabled(False)
+        self.ui.boutonPause.setEnabled(True)
 
     def onArreterClicked(self):
         print("Arrêt")
         self.systemControl = 1
+
+    def onPauseClicked(self):
+        print("Pause")
+        self.systemControl = 3
+        self.ui.boutonArreter.setEnabled(True)
+        self.ui.boutonRedemarrer.setEnabled(True)
+        self.ui.boutonPause.setEnabled(False)
 
     def threadCommunication(self):
         # Envoyer le signal de départ
@@ -81,7 +92,10 @@ class ApplicationPilulier:
         while(self.prescriptionEnCoursIndex < self.prescription.__len__()):
             # Attendre de recevoir une réponse du microcontroleur
             while not (self.serPort.in_waiting):
-                if self.systemControl == 1:  # L'utilisateur a appuyé sur le bouton d'arrêt
+                if self.systemControl == 3:  # Si l'utilisateur a appuyé sur le bouton de pause
+                    self.serPort.write(bytes([5]))
+                    self.attendreDeRedémarerOuArrêter()
+                if self.systemControl == 1:  # Si l'utilisateur a appuyé sur le bouton d'arrêt
                     self.serPort.write(bytes([2]))
                     self.systemControl = 0
                 time.sleep(0.200)
@@ -102,6 +116,7 @@ class ApplicationPilulier:
                 mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonDemarer.setEnabled(True)
+                self.ui.boutonPause.setEnabled(False)
                 return
             elif (ligneLue == "e2"):
                 self.messageAAfficher = "Le contenant de purge est mal placé."
@@ -110,6 +125,7 @@ class ApplicationPilulier:
                 mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonDemarer.setEnabled(True)
+                self.ui.boutonPause.setEnabled(False)
                 return
             elif (ligneLue == "e3"):
                 self.messageAAfficher = "Veuillez ajouter plus de pillules du type " \
@@ -130,6 +146,7 @@ class ApplicationPilulier:
                 self.messageNeedsUpdate = True
                 self.ui.boutonArreter.setEnabled(False)
                 self.ui.boutonDemarer.setEnabled(True)
+                self.ui.boutonPause.setEnabled(False)
                 return
             elif (ligneLue == "f"):
                 self.prescriptionEnCoursIndex = self.prescriptionEnCoursIndex + 1
@@ -138,9 +155,12 @@ class ApplicationPilulier:
                     # Attendre que l'usager appuie sur redémarer
                     self.ui.boutonArreter.setEnabled(False)
                     self.ui.boutonRedemarrer.setEnabled(True)
-                    self.messageAAfficher = "Verser les pilules de type " \
+                    self.ui.boutonPause.setEnabled(False)
+                    self.messageAAfficher = "Verser au moins " \
+                                            + str(self.getNombrePilulesRequis(self.prescriptionEnCoursIndex)) \
+                                            + " pillules du type " \
                                             + self.prescription[self.prescriptionEnCoursIndex].nom \
-                                            + " dans le système et appuyez sur redémarrer."
+                                            + " dans le système."
                     self.messageNeedsUpdate = True
                     mixer.music.load('messageTypeComplet.mp3')
                     mixer.music.play()
@@ -160,7 +180,30 @@ class ApplicationPilulier:
         mixer.music.play()
         self.ui.boutonArreter.setEnabled(False)
         self.ui.boutonDemarer.setEnabled(True)
+        self.ui.boutonPause.setEnabled(False)
         return
+
+    def attendreDeRedémarerOuArrêter(self):
+        while self.systemControl == 3:  # attendre que l'utilisateur appuie sur arrêter ou redémarer
+            time.sleep(0.2)
+
+        if self.systemControl == 2:  # Si l'utilisateur appuie sur redémarer
+            self.serPort.write(bytes([3]))
+            self.systemControl = 0
+        # Si l'utilisateur a appuyé sur le bouton arrêter, le reste de la routine du thread de communication
+        # devrait s'encharger
+        return
+
+    def getNombrePilulesRequis(self, prescriptionEnCoursIndex):
+        """
+        Cette fonction retourne le nombre minimum de pilules du type en cours qu'il faut verser dans le système
+        :param prescriptionEnCoursIndex: index qui indique à quel type de pilules on est rendu
+        :type prescriptionEnCoursIndex: int
+        :return: le nombre minimum de pilules du type en cours qu'il faut verser dans le système.
+        :rtype: int
+        """
+        matriceDePrescription = self.prescription[prescriptionEnCoursIndex].matriceDistribution
+        return matriceDePrescription.sum()
 
     def envoyerVecteursAuUC(self, prescriptionEnCoursIndex):
         # Initialiser les vecteurs à envoyer
