@@ -19,12 +19,12 @@ byte commande;
 byte matricePrescription[7][4];
 long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
-const int DIST_SEUIL1 = 70;
-const int DIST_SEUIL2 = 40;
+const int DIST_SEUIL1 = 60;
+const int DIST_SEUIL2 = 35;
 const long TEMPS_MAX = 200;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
-const int SENSOR_BLEU_SHUT_PIN = 11;
+//const int SENSOR_BLEU_SHUT_PIN = 11;
 const int SENSOR1_XSHUNT_PIN = 12;
 const int SENSOR2_XSHUNT_PIN = 13;
 const uint8_t SENSOR1_ADDRESS = 5;
@@ -60,25 +60,27 @@ void setup() {
     //Association des adresses des capteurs
     pinMode(SENSOR1_XSHUNT_PIN, OUTPUT);
     pinMode(SENSOR2_XSHUNT_PIN, OUTPUT);
-    pinMode(SENSOR_BLEU_SHUT_PIN, OUTPUT);
+    //pinMode(SENSOR_BLEU_SHUT_PIN, OUTPUT);
     digitalWrite(SENSOR1_XSHUNT_PIN, LOW);
     digitalWrite(SENSOR2_XSHUNT_PIN, LOW);
-    digitalWrite(SENSOR_BLEU_SHUT_PIN, LOW);
+    //digitalWrite(SENSOR_BLEU_SHUT_PIN, LOW);
     Serial.begin(115200);
     Wire.begin();
     //Set les adresses des capteurs
     setSensorsAddress();
+    Serial.println("apres sensor address");
     initVar();
-
+    Serial.println(" apres initVar");
     //Connecter un DC motor au port M1 et l'autre au port M3
     AFMS.begin();
     DClent = AFMS.getMotor(1);
     DCrapide = AFMS.getMotor(3);
-    DClent->setSpeed(150); // À déterminer
+    DClent->setSpeed(200); // À déterminer
     DCrapide->setSpeed(150); // À déterminer
 }
 
 void loop(){
+    Serial.println("debut loop");
     DClent->run(RELEASE);
     DCrapide->run(RELEASE);
     //Réinitialise les valeurs des variables
@@ -101,6 +103,7 @@ void loop(){
     //UNCOMMENT Pour utiliser code de calibration
     recuComp = false;
     recuDist = false;
+    Serial.println("avant slave");
     while(!recuComp && !recuDist){ 
         Wire.requestFrom(ADRESSE_COMP,1);
         recuComp = Serial.read();
@@ -109,7 +112,8 @@ void loop(){
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
     }
-    
+    Serial.println("apres slave");
+
     Serial.println("Les slaves sont calibres et ready");   //print pour les tests
 
     if (ready){
@@ -313,20 +317,22 @@ void loop(){
 void purgePartielle() {
   DClent->run(RELEASE);
   DCrapide->run(BACKWARD); 
-  //delay(5000); // Temps à déterminer, uncomment pour vrai code
+  delay(2000); // Temps à déterminer, uncomment pour vrai code
   DCrapide->run(RELEASE);
 }
 
 void purgeComplete() {
-    DClent->setSpeed(150); // À déterminer
+    DClent->setSpeed(250); // À déterminer
     DClent->run(FORWARD); // À voir si on a besoin de run le moteur après avoir changer la vitesse
     DCrapide->run(BACKWARD); 
-    //delay à déterminer
+    delay(5000);
     DClent->run(RELEASE);
-    DClent->run(RELEASE);
+    DCrapide->run(RELEASE);
+    initVar();
 }
 
 void arret(){
+    purgeComplete();
     DClent->run(RELEASE);
     DCrapide->run(RELEASE);
     Wire.beginTransmission(ADRESSE_DIST);
@@ -362,7 +368,7 @@ void verifCommande(){
 
 void verifPurge(){
     if(digitalRead(capPurPin)){
-        arret();
+        arret();//à modifier
         Serial.println("e2");
         Serial.println("Veuillez bien insérer le récipient de purge");
         ready = false;
@@ -379,22 +385,29 @@ void verifPil(){
 }
 
 void setSensorsAddress() {
-  // Changer l'addresse du sensor1
-  pinMode(SENSOR1_XSHUNT_PIN, INPUT);
-  delay(50);
-  sensor1.init(true);
-  delay(50);
-  sensor1.setAddress(SENSOR1_ADDRESS);
-  delay(50);
-  // Changer l'addresse du sensor2
-  pinMode(SENSOR2_XSHUNT_PIN, INPUT);
-  delay(50);
-  sensor2.init(true);
-  delay(50);
-  sensor2.setAddress(SENSOR2_ADDRESS);
-  delay(50);
+    // Changer l'addresse du sensor1
+    pinMode(SENSOR1_XSHUNT_PIN, INPUT);
+    delay(100);
+    Serial.println("avant init sensor1");
+    while(sensor1.init(true)==0){
+        delay(20);
+    }
+    Serial.println("sensor 1 ready");
+    delay(100);
+    sensor1.setAddress(SENSOR1_ADDRESS);
+    delay(100);
+    // Changer l'addresse du sensor2
+    pinMode(SENSOR2_XSHUNT_PIN, INPUT);
+    delay(100);
+    while(sensor2.init(true)==0){
+        delay(20);
+    }
+    Serial.println("sensor 2 ready");
+    delay(100);
+    sensor2.setAddress(SENSOR2_ADDRESS);
+    delay(100);
 
-  // Activer le sensor bleu
-  pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
-  delay(50);
+    // Activer le sensor bleu
+    //pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
+    delay(50);
 }
