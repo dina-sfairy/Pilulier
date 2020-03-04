@@ -9,13 +9,27 @@ from pygame import mixer  # Pour jouer des sons
 
 
 class PilulePrescrite:
+    """
+    Ceci est une classe qui représente une pilule prescrite. Une pilules est simplement caractérisée par son nom et
+    une matrice de distribution (7 lignes, 4 colonnes) indiquant combien de pilules doivent être placés dans le
+    pilulier pour chaque moment de la journée.
+    """
     def __init__(self, nom, matriceDistribution):
         self.nom = nom
         self.matriceDistribution = matriceDistribution
 
 
 class ApplicationPilulier:
+    """
+    Cette classe est le coeur du programme. C'est cette classe qui s'occupe de gérer l'interface, la communication
+    et le traitement de données.
+    """
     def __init__(self, MainWindow):
+        """
+        Ceci est le constructeur de la classe ApplicationPilulier. Il est appelé au moment où la classe est créée.
+        :param MainWindow: L'objet qui décrit la géométrie de l'interface, ainsi que son contenu (boutons,
+        noms des boutons, cases, etc.)
+        """
         self.ui = Ui_MainWindow()
         self.ui.setupUi(MainWindow)
         self.ui.messagesTextEdit.setReadOnly(True)
@@ -53,7 +67,7 @@ class ApplicationPilulier:
         prescriptionSelectionnee = self.ui.listePrescriptions.currentItem().text()
         print(prescriptionSelectionnee)
         nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow() + 1) + ".txt"
-        self.lirePrescription(nomFichierPrescription)
+        self.lirePrescription(nomFichierPrescription)  # Lire la prescription
         self.afficherPrescription()
 
         self.prescriptionEnCoursIndex = 0  # sert à suivre où nous sommes rendu dans la distribution
@@ -65,7 +79,7 @@ class ApplicationPilulier:
 
         # self.threadCommunication()
         t = threading.Thread(target=self.threadCommunication)
-        t.start()
+        t.start()  # Démmarre la fonction threadCommunication dans un nouveau thread
 
     def onRedemarrerClicked(self):
         self.systemControl = 2
@@ -85,6 +99,12 @@ class ApplicationPilulier:
         self.ui.boutonPause.setEnabled(False)
 
     def threadCommunication(self):
+        """
+        Cette fonction effectue la communication entre l'interface et le microcontrôleur.
+        Note: puisque les interfaces pyQt ne sont pas thread-safe, il n'est pas possible de modifier les messages sur
+        l'interface directement à partir de ce thread. C'est pour celà que la fonction updateMessage est appelée
+        à partir du main thread toutes les 0.3 secondes.
+        """
         # Envoyer le signal de départ
         self.serPort.write(bytes([1]))
         self.envoyerVecteursAuUC(self.prescriptionEnCoursIndex)
@@ -230,11 +250,19 @@ class ApplicationPilulier:
                 self.serPort.write(bytes([vecteurAEnvoyer[j]]))
 
     def envoyerMatrice(self, matricePrescription):
+        """
+        Old. N'est plus utilisé.
+        """
         for i in range(7):
             for j in range(4):
                 self.serPort.write(bytes([matricePrescription[i, j]]))
 
     def updateMessage(self):
+        """
+        Cette méthode est appelée à chaque 0.3 secondes à partir du main thread pour vérifier s'il faut mettre
+        les instructions à jour. Ceci doit être fait à partir du main thread puisque les interfaces pyQt ne sont pas
+        thread safe.
+        """
         if self.messageNeedsUpdate is True:
             self.ui.messagesTextEdit.setText(self.messageAAfficher)
             self.messageNeedsUpdate = False
