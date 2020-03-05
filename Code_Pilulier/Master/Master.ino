@@ -5,7 +5,7 @@
 int nano_comp = 1;
 int nano_dist = 1;
 //int test[7] = { 1,0,0,2,1,1,0 };
-int test[7] = { 4,4,4,4,4,4,4 };
+int test[7] = { 5,5,5,5,5,5,5 };
 
 int test_dist[4] = { 1,2,3,4 };
 int pos;
@@ -29,6 +29,9 @@ void setup() {
 	presentTime = millis();
 	ready = false;
 	chiffre = 0;
+	Wire.beginTransmission(10); 
+	Wire.write(10); 
+	Wire.endTransmission();
 	
 }
 
@@ -72,9 +75,10 @@ void commanderCompartimentation() {
 	delay(50);
 	//nano_comp++;
 	if (pos == 7) {
+		delay(1000);
 		ready = false;
 		Wire.requestFrom(10, 2);
-		delay(2000);
+		//delay(2000);
 		while (Wire.available())
 		{
 			pos = 0;
@@ -84,14 +88,16 @@ void commanderCompartimentation() {
 				Wire.beginTransmission(10); // transmit to device #10
 				Wire.write(8);              // sends x 
 				Wire.endTransmission();
-				delay(50);
+				delay(2000);
 				//Serial.println(8);
 				ready = false;
 				break;
 			}
 
 		}
-		
+		Wire.beginTransmission(10);
+		Wire.write(10);
+		Wire.endTransmission();
 	}
 	
 	

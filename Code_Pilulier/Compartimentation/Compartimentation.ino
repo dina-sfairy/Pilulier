@@ -35,8 +35,8 @@ int etat; // Variable d�terminant l'�tat de compl�tion d'une prescription 
 
 void setup() {
 	// Define the LED pin as Output
-	ASstepper2.setMaxSpeed(50); // 200 et 400 acc
-	ASstepper2.setAcceleration(50);
+	ASstepper2.setMaxSpeed(100); // 200 et 400 acc
+	ASstepper2.setAcceleration(150);
 	// Start the I2C Bus as Slave on address 10
 	Wire.begin(10);
 	// Attach a function to trigger when something is received.
@@ -110,9 +110,14 @@ void receiveEvent(int bytes) {
 		}
 		else
 			ajustement = false;
+		break;
 
 	case 9:
 		pos = posAjustement;
+		break;
+
+	case 10:
+		posTetePrescription = 0;
 		break;
 
 	default:
