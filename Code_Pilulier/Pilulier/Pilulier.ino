@@ -296,8 +296,12 @@ void pause(){
     DCrapide->run(RELEASE);
     commSlave(ADRESSE_DIST, 0);
     commSlave(ADRESSE_COMP, 0);
-    //Boucle qui attend qu'on pèse sur redémarrer
-    //update timer
+    while(Serial.available() ==0){
+        verifPil();
+        verifPurge();
+        timePilule = millis();
+    }
+    verifCommande();
 }
 
 //Fonction de vérification: vérifie si l'interface tente de communiquer avec le master
@@ -307,12 +311,15 @@ void verifCommande(){
         commande = Serial.read();
         switch (commande) {
         case 2:
-            pause(); //à changer parce que lié au bouton pause qui n'existe pas
+            arret(); //à changer parce que lié au bouton pause qui n'existe pas
             break;
         case 3: 
             timePilule = millis();
             DCrapide->run(FORWARD);
             DClent->run(FORWARD);
+            break;
+        case 5:
+            pause();
             break;
         default:
             arret(); //gestion d'erreur nécessaire pour commande érronée

@@ -3,7 +3,6 @@
 #include <VL53L0X.h>
 #include <Adafruit_MotorShield.h>
 
-
 //Déclaration des variables et constantes
 VL53L0X sensor1, sensor2; 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -12,8 +11,7 @@ Adafruit_DCMotor *DCrapide;
 bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2, recuComp, recuDist;
 int tailleVect[4]; 
 int pilParMoment[4]; 
-int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin;
-int momentEnCours;
+int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin, momentEnCours;
 byte deplacement[21][4];
 byte commande;
 byte matricePrescription[7][4];
