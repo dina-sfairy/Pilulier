@@ -2,13 +2,15 @@
 #include <Wire.h>
 #include <VL53L0X.h>
 #include <Adafruit_MotorShield.h>
+#include <Adafruit_VL6180X.h>
 
 //Déclaration des variables et constantes
 VL53L0X sensor1, sensor2; 
+//Adafruit_VL6180X sensorBleu;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
-bool capteurPil, capteurPur, ready, momentDone, PrescDone, samePil1, samePil2, recuComp, recuDist;
+bool capteurPil, capteurPur, capteurCompart, ready, momentDone, PrescDone, samePil1, samePil2, recuComp, recuDist;
 int tailleVect[4]; 
 int pilParMoment[4]; 
 int compteur1, compteur2, compteurTot, distancePil1, distancePil2, capPilPin, capPurPin, momentEnCours;
@@ -39,6 +41,7 @@ void initVar(){
     momentEnCours = 0;
     capteurPil = true; //à modifier quand on aura les vrais capteurs
     capteurPur = true; //à modifier quand on aura les vrais capteurs
+    //capteurComp = false;
     ready = true; //Mettre true pour les tests sans capteur de purge/pilulier
     momentDone = false;
     PrescDone = false;
