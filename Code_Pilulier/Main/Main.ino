@@ -6,7 +6,7 @@
 
 //Déclaration des variables et constantes
 VL53L0X sensor1, sensor2; 
-//Adafruit_VL6180X sensorBleu;
+//Adafruit_VL6180X sensorBleu = Adafruit_VL6180X();
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *DClent;
 Adafruit_DCMotor *DCrapide;
@@ -21,6 +21,7 @@ long timeActuel, timePilule;
 //modifier les constantes suivantes pour les bonnes valeurs
 const int DIST_SEUIL1 = 60;
 const int DIST_SEUIL2 = 35;
+const int DIST_SEUIL3 = 25; // À modifier après tests
 const long TEMPS_MAX = 200;      //à changer après test
 const int ADRESSE_COMP = 10;
 const int ADRESSE_DIST = 11;
@@ -41,7 +42,7 @@ void initVar(){
     momentEnCours = 0;
     capteurPil = true; //à modifier quand on aura les vrais capteurs
     capteurPur = true; //à modifier quand on aura les vrais capteurs
-    //capteurComp = false;
+    //capteurCompart = false;
     ready = true; //Mettre true pour les tests sans capteur de purge/pilulier
     momentDone = false;
     PrescDone = false;
@@ -99,19 +100,22 @@ void loop(){
           Serial.println("Veuillez bien insérer le récipient de purge");
           }
         if (capteurPil && capteurPur){ready = true;}
+        // if (capteurPil && capteurPur && capteurCompart) {ready = true;}  À inclure lorsque Capteur bleu incorporé
     }
 
     //UNCOMMENT Pour utiliser code de calibration
     recuComp = false;
     recuDist = false;
     Serial.println("avant slave");
-    while(!recuComp && !recuDist){ 
+    //while(!recuComp && !recuDist && capteurCompart){ 
+    while(!recuComp && !recuDist) {
         Wire.requestFrom(ADRESSE_COMP,1);
         recuComp = Serial.read();
         Wire.requestFrom(ADRESSE_DIST,1);
         recuDist = Serial.read();
         //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
         //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
+        //verifCompart(); Calibration
     }
     Serial.println("apres slave");
 
@@ -176,6 +180,7 @@ void loop(){
                 Serial.print("Debut moment de journée :"); Serial.println(momentEnCours); //print pour les tests
                 timePilule = millis();
                 while(momentDone == false){
+                  //capteurCompart = false;
                     verifCommande();
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
@@ -281,7 +286,9 @@ void loop(){
                     //verifPil();   //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                     //verifPurge(); //À mettre en commentaires pour les tests sans capteur de purge/pilulier
                 }
-                
+                //while (!capteurCompart) {
+                //  verifCompart();
+                //}
                 Serial.println("tapis compartimentation est pret et en place"); //print pour les tests
                 Wire.beginTransmission(ADRESSE_DIST);
                 Wire.write(momentEnCours+1);
@@ -385,6 +392,19 @@ void verifPil(){
     }
 }
 
+void verifCompart() {
+  uint8_t range = sensorBleu.readRange();
+  uint8_t status = sensorBleu.readRangeStatus();
+  if (status = VL6180X_ERROR_NONE) {
+    while (range < DIST_SEUIL3) {
+      Wire.beginTransmission(ADRESSE_COMP);
+      Wire.write("10");
+      Wire.endTransmission();
+      delay(50);
+    }
+    capteurCompart = true;
+  }
+}
 void setSensorsAddress() {
     // Changer l'addresse du sensor1
     pinMode(SENSOR1_XSHUNT_PIN, INPUT);
@@ -409,6 +429,10 @@ void setSensorsAddress() {
     delay(100);
 
     // Activer le sensor bleu
-    //pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
-    delay(50);
+//    Serial.println("SensorBleu");
+//    pinMode(SENSOR_BLEU_SHUT_PIN, INPUT);
+//    delay(50);
+//    Serial.println("SensorBleu declare");
+//    sensorBleu.begin();
+//    delay(50);
 }
