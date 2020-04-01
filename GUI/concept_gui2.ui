@@ -6,27 +6,90 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>294</height>
+    <width>338</width>
+    <height>292</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="toolTip">
+   <string>Informations sur la prescription sélectionnée</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="label">
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Choisir la prescription</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Choisir la prescription</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_9">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="boutonInfo">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Script MT Bold</family>
+          <pointsize>16</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>i</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QListWidget" name="listePrescriptions">
@@ -82,12 +145,16 @@
      <widget class="QLabel" name="label_2">
       <property name="font">
        <font>
+        <pointsize>10</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Instructions</string>
+       <string>Messages</string>
       </property>
      </widget>
     </item>
@@ -95,32 +162,141 @@
      <widget class="QTextEdit" name="messagesTextEdit"/>
     </item>
     <item>
-     <widget class="QPushButton" name="boutonDemarer">
-      <property name="text">
-       <string>Démarrer</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="boutonDemarer">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Démarrer la distribution</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>icon_start.png</normaloff>icon_start.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="boutonPause">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Pause</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>icon_pause.png</normaloff>icon_pause.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="boutonRedemarrer">
-      <property name="text">
-       <string>Redémarrer</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="boutonPause">
-      <property name="text">
-       <string>Pause</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="boutonArreter">
-      <property name="text">
-       <string>Arrêter</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="boutonArreter">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Arrêter</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>icon_stop.png</normaloff>icon_stop.png</iconset>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="boutonRedemarrer">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Continuer la distribution</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>icon_redemarrer.png</normaloff>icon_redemarrer.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
