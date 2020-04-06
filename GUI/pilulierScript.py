@@ -43,6 +43,7 @@ class ApplicationPilulier:
         self.ui.boutonDemarer.clicked.connect(self.onDemarerClicked)
         self.ui.boutonArreter.clicked.connect(self.onArreterClicked)
         self.ui.boutonRedemarrer.clicked.connect(self.onRedemarrerClicked)
+        self.ui.boutonInfo.clicked.connect(self.onInfoClicked)
 
         # Créer un timer qui va refresh les instructions lorsque nécéssaire
         self.checkMessageTimer = QtCore.QTimer()
@@ -56,14 +57,15 @@ class ApplicationPilulier:
         # Créer une variable qui servira de contrôle pour l'arrêt du système
         self.systemControl = 0
 
-        # Démarer la communication avec l'arduino
-        self.serPort = serial.Serial('COM16', 115200)
-        time.sleep(3)  # Il faut donner le temps au Arduino de reset
+        # Démarer la communication avec l'arduino (décommenter lorsqu'on travaille avec le prototype physique)
+        # self.serPort = serial.Serial('COM16', 115200)
+        # time.sleep(3)  # Il faut donner le temps au Arduino de reset
 
     def onDemarerClicked(self):
         print("Démarage")
         self.ui.boutonDemarer.setEnabled(False)
         self.ui.boutonArreter.setEnabled(True)
+        self.ui.boutonPause.setEnabled(True)
         prescriptionSelectionnee = self.ui.listePrescriptions.currentItem().text()
         print(prescriptionSelectionnee)
         nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow() + 1) + ".txt"
@@ -76,6 +78,12 @@ class ApplicationPilulier:
                                          + " pillules du type "
                                          + self.prescription[self.prescriptionEnCoursIndex].nom
                                          + " dans le système.")
+
+        # Fonction pour afficher les messages lorsqu'on n'a pas accès au prototype physique
+        accesAuPrototype = False
+        if accesAuPrototype is False:
+            self.afficherMessage(1)
+            return
 
         # self.threadCommunication()
         t = threading.Thread(target=self.threadCommunication)
@@ -97,6 +105,22 @@ class ApplicationPilulier:
         self.ui.boutonArreter.setEnabled(True)
         self.ui.boutonRedemarrer.setEnabled(True)
         self.ui.boutonPause.setEnabled(False)
+
+    def onInfoClicked(self):
+        """
+        Cette fonction lit le fichier .txt de la prescription sélectionnée et l'affiche dans une fenêtre pop-up
+        """
+        messageContenu = "Contenu de la prescription : \t \t  \n \n"
+        nomFichierPrescription = "prescription" + str(self.ui.listePrescriptions.currentRow() + 1) + ".txt"
+        fichierPrescription = open(nomFichierPrescription, 'r')
+        contenuFichier = fichierPrescription.read()
+        messageContenu = messageContenu + contenuFichier
+        fichierPrescription.close()
+
+        fenetreInfo = QtWidgets.QMessageBox()
+        fenetreInfo.setWindowTitle("Informations sur la prescription")
+        fenetreInfo.setText(messageContenu)
+        fenetreInfo.exec()
 
     def threadCommunication(self):
         """
@@ -135,7 +159,7 @@ class ApplicationPilulier:
                 mixer.music.load('messagePilulier.mp3')
                 mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
-                self.ui.boutonDemarer.setEnabled(True)
+                self.ui.boutonRedemarrer.setEnabled(True)
                 self.ui.boutonPause.setEnabled(False)
                 return
             elif (ligneLue == "e2"):
@@ -144,7 +168,7 @@ class ApplicationPilulier:
                 mixer.music.load('messagePurge.mp3')
                 mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
-                self.ui.boutonDemarer.setEnabled(True)
+                self.ui.boutonRedemarrer.setEnabled(True)
                 self.ui.boutonPause.setEnabled(False)
                 return
             elif (ligneLue == "e3"):
@@ -155,6 +179,7 @@ class ApplicationPilulier:
                 mixer.music.load('messageManquePilules.mp3')
                 mixer.music.play()
                 self.ui.boutonArreter.setEnabled(False)
+                self.ui.boutonPause.setEnabled(False)
                 self.ui.boutonRedemarrer.setEnabled(True)
                 while(self.systemControl is not 2): # L'utilisateur doit appuyer sur le bouton redémarrer
                     time.sleep(0.2)
@@ -256,6 +281,60 @@ class ApplicationPilulier:
         for i in range(7):
             for j in range(4):
                 self.serPort.write(bytes([matricePrescription[i, j]]))
+
+    def afficherMessage(self, numeroMessage):
+        if numeroMessage is 1:
+            self.messageAAfficher = "Le pilulier est mal placé."
+            self.messageNeedsUpdate = True
+            mixer.music.load('messagePilulier.mp3')
+            mixer.music.play()
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonRedemarrer.setEnabled(True)
+            self.ui.boutonPause.setEnabled(False)
+        elif numeroMessage is 2:
+            self.messageAAfficher = "Le contenant de purge est mal placé."
+            self.messageNeedsUpdate = True
+            mixer.music.load('messagePurge.mp3')
+            mixer.music.play()
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonRedemarrer.setEnabled(True)
+            self.ui.boutonPause.setEnabled(False)
+        elif numeroMessage is 3:
+            self.messageAAfficher = "Veuillez ajouter plus de pillules du type " \
+                                    + self.prescription[self.prescriptionEnCoursIndex].nom + " dans le système" \
+                                    + " et appuyez sur le bouton 'redémarrer'."
+            self.messageNeedsUpdate = True
+            mixer.music.load('messageManquePilules.mp3')
+            mixer.music.play()
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonPause.setEnabled(False)
+            self.ui.boutonRedemarrer.setEnabled(True)
+        elif numeroMessage is 4:
+            self.messageAAfficher = "Arrêt du système."
+            self.messageNeedsUpdate = True
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonDemarer.setEnabled(True)
+            self.ui.boutonPause.setEnabled(False)
+        elif numeroMessage is 5:
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonRedemarrer.setEnabled(True)
+            self.ui.boutonPause.setEnabled(False)
+            self.messageAAfficher = "Verser au moins " \
+                                    + str(self.getNombrePilulesRequis(self.prescriptionEnCoursIndex)) \
+                                    + " pillules du type " \
+                                    + self.prescription[self.prescriptionEnCoursIndex].nom \
+                                    + " dans le système."
+            self.messageNeedsUpdate = True
+            mixer.music.load('messageTypeComplet.mp3')
+            mixer.music.play()
+        elif numeroMessage is 6:
+            self.messageAAfficher = "La prescription est terminée."
+            self.messageNeedsUpdate = True
+            mixer.music.load('messagePrescriptionTerminee.mp3')
+            mixer.music.play()
+            self.ui.boutonArreter.setEnabled(False)
+            self.ui.boutonDemarer.setEnabled(True)
+            self.ui.boutonPause.setEnabled(False)
 
     def updateMessage(self):
         """
