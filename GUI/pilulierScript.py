@@ -82,7 +82,7 @@ class ApplicationPilulier:
         # Fonction pour afficher les messages lorsqu'on n'a pas accès au prototype physique
         accesAuPrototype = False
         if accesAuPrototype is False:
-            self.afficherMessage(1)
+            self.afficherMessage(6)
             return
 
         # self.threadCommunication()
@@ -319,7 +319,7 @@ class ApplicationPilulier:
             self.ui.boutonArreter.setEnabled(False)
             self.ui.boutonRedemarrer.setEnabled(True)
             self.ui.boutonPause.setEnabled(False)
-            self.messageAAfficher = "Verser au moins " \
+            self.messageAAfficher = " Vider la purge et verser au moins " \
                                     + str(self.getNombrePilulesRequis(self.prescriptionEnCoursIndex)) \
                                     + " pillules du type " \
                                     + self.prescription[self.prescriptionEnCoursIndex].nom \
