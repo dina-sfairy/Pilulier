@@ -1,3 +1,8 @@
+/*
+	--------- Code de prototypage, ne fait pas partie de la solution finale --------------------
+*/
+
+
 
 #include <TimedAction.h>
 #include <Wire.h>
